@@ -1,0 +1,1102 @@
+{
+  "keepOriginals": [
+    "narrative-02.jpg",
+    "narrative-04.jpg",
+    "narrative-05.jpg",
+    "narrative-07.jpg",
+    "nature-01.jpg",
+    "nature-02.jpg",
+    "nature-03.jpg",
+    "nature-04.jpg",
+    "nature-05.jpg",
+    "nature-06.jpg",
+    "nature-07.jpg",
+    "nature-08.jpg",
+    "nature-09.jpg",
+    "geometry-01.jpg",
+    "geometry-02.jpg",
+    "geometry-03.jpg",
+    "geometry-04.jpg",
+    "geometry-05.jpg",
+    "geometry-06.jpg",
+    "geometry-07.jpg",
+    "geometry-08.jpg",
+    "geometry-09.jpg",
+    "material-01.jpg",
+    "material-04.jpg",
+    "material-08.jpg",
+    "material-09.jpg",
+    "symbol-01.jpg",
+    "symbol-02.jpg",
+    "symbol-03.jpg",
+    "symbol-04.jpg",
+    "symbol-06.jpg",
+    "symbol-08.jpg",
+    "symbol-09.jpg",
+    "space-02.jpg",
+    "space-03.jpg",
+    "space-05.jpg",
+    "space-07.jpg",
+    "space-08.jpg",
+    "space-09.jpg"
+  ],
+  "excludeOriginals": [
+    "material-02.jpg",
+    "material-03.jpg",
+    "material-05.jpg",
+    "material-06.jpg",
+    "material-07.jpg",
+    "narrative-01.jpg",
+    "narrative-03.jpg",
+    "narrative-06.jpg",
+    "narrative-08.jpg",
+    "narrative-09.jpg",
+    "space-01.jpg",
+    "space-04.jpg",
+    "space-06.jpg",
+    "symbol-05.jpg",
+    "symbol-07.jpg"
+  ],
+  "extraAssets": [
+    {
+      "file": "kaleido-01.jpg",
+      "category": "geometry",
+      "title": "蝶纹黑白万花纹",
+      "page": 901,
+      "source": "万花镜精选裁切样本",
+      "note": "黑白蝶形与花枝交错，适合生成清晰的中心放射和镜像轮廓。",
+      "words": [
+        "万花镜",
+        "无白边",
+        "满幅纹样",
+        "二次创作"
+      ],
+      "originalCrop": "crop_161.jpg"
+    },
+    {
+      "file": "kaleido-02.jpg",
+      "category": "symbol",
+      "title": "圆盘瑞兽万花纹",
+      "page": 902,
+      "source": "万花镜精选裁切样本",
+      "note": "圆形边界内有高密度动物与花叶，旋转后形成团花式祝福结构。",
+      "words": [
+        "万花镜",
+        "无白边",
+        "满幅纹样",
+        "二次创作"
+      ],
+      "originalCrop": "crop_151.jpg"
+    },
+    {
+      "file": "kaleido-03.jpg",
+      "category": "nature",
+      "title": "团寿云纹万花样",
+      "page": 903,
+      "source": "万花镜精选裁切样本",
+      "note": "寿字与云气共同围合，适合福寿主题的镜像再创作。",
+      "words": [
+        "万花镜",
+        "无白边",
+        "满幅纹样",
+        "二次创作"
+      ],
+      "originalCrop": "crop_160.jpg"
+    },
+    {
+      "file": "kaleido-04.jpg",
+      "category": "geometry",
+      "title": "团寿近景万花样",
+      "page": 904,
+      "source": "万花镜精选裁切样本",
+      "note": "截取寿字圆盘局部，让线条和色块在万花镜中形成连贯纹理。",
+      "words": [
+        "万花镜",
+        "无白边",
+        "满幅纹样",
+        "二次创作"
+      ],
+      "originalCrop": "crop_172.jpg"
+    },
+    {
+      "file": "kaleido-05.jpg",
+      "category": "symbol",
+      "title": "黑底花鸟团纹",
+      "page": 905,
+      "source": "万花镜精选裁切样本",
+      "note": "深色底上花鸟轮廓清晰，适合生成高对比的旋转花心。",
+      "words": [
+        "万花镜",
+        "无白边",
+        "满幅纹样",
+        "二次创作"
+      ],
+      "originalCrop": "crop_157.jpg"
+    },
+    {
+      "file": "kaleido-06.jpg",
+      "category": "space",
+      "title": "回纹寿字局部",
+      "page": 906,
+      "source": "万花镜精选裁切样本",
+      "note": "回纹、寿字和边饰形成强几何节奏，可用于福文化符号扩展。",
+      "words": [
+        "万花镜",
+        "无白边",
+        "满幅纹样",
+        "二次创作"
+      ],
+      "originalCrop": "crop_068.jpg"
+    },
+    {
+      "file": "kaleido-07.jpg",
+      "category": "nature",
+      "title": "酒红团花盘纹",
+      "page": 907,
+      "source": "万花镜精选裁切样本",
+      "note": "圆形花盘与小花点缀结合，适合形成柔和的团花万花效果。",
+      "words": [
+        "万花镜",
+        "无白边",
+        "满幅纹样",
+        "二次创作"
+      ],
+      "originalCrop": "crop_137.jpg"
+    },
+    {
+      "file": "kaleido-08.jpg",
+      "category": "symbol",
+      "title": "凤鸟火纹团样",
+      "page": 908,
+      "source": "万花镜精选裁切样本",
+      "note": "凤鸟和火焰形花纹集中排列，适合生成热烈的节庆中心图案。",
+      "words": [
+        "万花镜",
+        "无白边",
+        "满幅纹样",
+        "二次创作"
+      ],
+      "originalCrop": "crop_139.jpg"
+    },
+    {
+      "file": "kaleido-09.jpg",
+      "category": "geometry",
+      "title": "蓝地花鸟连续纹",
+      "page": 909,
+      "source": "万花镜精选裁切样本",
+      "note": "蓝红花鸟连续分布，镜像后能形成稳定的满地纹节奏。",
+      "words": [
+        "万花镜",
+        "无白边",
+        "满幅纹样",
+        "二次创作"
+      ],
+      "originalCrop": "crop_097.jpg"
+    },
+    {
+      "file": "kaleido-10.jpg",
+      "category": "symbol",
+      "title": "深底寿纹团样",
+      "page": 910,
+      "source": "万花镜精选裁切样本",
+      "note": "寿字与深色底纹结合，适合做庄重的福寿主题图案。",
+      "words": [
+        "万花镜",
+        "无白边",
+        "满幅纹样",
+        "二次创作"
+      ],
+      "originalCrop": "crop_145.jpg"
+    },
+    {
+      "file": "kaleido-11.jpg",
+      "category": "nature",
+      "title": "红黑菱形锦纹",
+      "page": 911,
+      "source": "万花镜精选裁切样本",
+      "note": "菱形和锯齿连续推进，适合形成硬朗的几何万花镜结构。",
+      "words": [
+        "万花镜",
+        "无白边",
+        "满幅纹样",
+        "二次创作"
+      ],
+      "originalCrop": "crop_062.jpg"
+    },
+    {
+      "file": "kaleido-12.jpg",
+      "category": "geometry",
+      "title": "深色菱格福纹",
+      "page": 912,
+      "source": "万花镜精选裁切样本",
+      "note": "深色菱格高密度铺陈，旋转后会出现清晰的中心花形。",
+      "words": [
+        "万花镜",
+        "无白边",
+        "满幅纹样",
+        "二次创作"
+      ],
+      "originalCrop": "crop_085.jpg"
+    },
+    {
+      "file": "kaleido-13.jpg",
+      "category": "symbol",
+      "title": "灰地团花连续纹",
+      "page": 913,
+      "source": "万花镜精选裁切样本",
+      "note": "团花和叶形规则排列，适合生成均衡的重复纹样。",
+      "words": [
+        "万花镜",
+        "无白边",
+        "满幅纹样",
+        "二次创作"
+      ],
+      "originalCrop": "crop_009.jpg"
+    },
+    {
+      "file": "kaleido-14.jpg",
+      "category": "space",
+      "title": "蓝地小团花纹",
+      "page": 914,
+      "source": "万花镜精选裁切样本",
+      "note": "深蓝底上的小团花间距均匀，适合做柔和背景型万花纹。",
+      "words": [
+        "万花镜",
+        "无白边",
+        "满幅纹样",
+        "二次创作"
+      ],
+      "originalCrop": "crop_169.jpg"
+    },
+    {
+      "file": "kaleido-15.jpg",
+      "category": "nature",
+      "title": "八角花锦近景",
+      "page": 915,
+      "source": "万花镜精选裁切样本",
+      "note": "八角花和锯齿边构成强中心结构，适合福文化主视觉。",
+      "words": [
+        "万花镜",
+        "无白边",
+        "满幅纹样",
+        "二次创作"
+      ],
+      "originalCrop": "crop_075.jpg"
+    },
+    {
+      "file": "kaleido-16.jpg",
+      "category": "symbol",
+      "title": "橙地小花满幅纹",
+      "page": 916,
+      "source": "万花镜精选裁切样本",
+      "note": "暖色底和小花满幅铺展，适合生成明快的节庆纹样。",
+      "words": [
+        "万花镜",
+        "无白边",
+        "满幅纹样",
+        "二次创作"
+      ],
+      "originalCrop": "crop_104.jpg"
+    },
+    {
+      "file": "kaleido-17.jpg",
+      "category": "geometry",
+      "title": "金地缠枝花局部",
+      "page": 917,
+      "source": "万花镜精选裁切样本",
+      "note": "金色缠枝花在深底上连续盘绕，适合表现富贵和福气绵延。",
+      "words": [
+        "万花镜",
+        "无白边",
+        "满幅纹样",
+        "二次创作"
+      ],
+      "originalCrop": "crop_174.jpg"
+    },
+    {
+      "file": "kaleido-18.jpg",
+      "category": "symbol",
+      "title": "蓝白回纹近景",
+      "page": 918,
+      "source": "万花镜精选裁切样本",
+      "note": "回纹折返路径清晰，适合做连续几何构成的再创作。",
+      "words": [
+        "万花镜",
+        "无白边",
+        "满幅纹样",
+        "二次创作"
+      ],
+      "originalCrop": "crop_058.jpg"
+    },
+    {
+      "file": "kaleido-19.jpg",
+      "category": "nature",
+      "title": "四方花格局部",
+      "page": 919,
+      "source": "万花镜精选裁切样本",
+      "note": "四方网格与花朵单元结合，适合生成有秩序的团花背景。",
+      "words": [
+        "万花镜",
+        "无白边",
+        "满幅纹样",
+        "二次创作"
+      ],
+      "originalCrop": "crop_018.jpg"
+    },
+    {
+      "file": "kaleido-20.jpg",
+      "category": "geometry",
+      "title": "红黑白满地纹",
+      "page": 920,
+      "source": "万花镜精选裁切样本",
+      "note": "红黑白小单元高密度重复，适合产品设计的满铺贴图。",
+      "words": [
+        "万花镜",
+        "无白边",
+        "满幅纹样",
+        "二次创作"
+      ],
+      "originalCrop": "crop_088.jpg"
+    },
+    {
+      "file": "kaleido-21.jpg",
+      "category": "symbol",
+      "title": "深色星形菱纹",
+      "page": 921,
+      "source": "万花镜精选裁切样本",
+      "note": "星形与菱形交织，适合生成更锐利的万花镜骨架。",
+      "words": [
+        "万花镜",
+        "无白边",
+        "满幅纹样",
+        "二次创作"
+      ],
+      "originalCrop": "crop_076.jpg"
+    },
+    {
+      "file": "kaleido-22.jpg",
+      "category": "space",
+      "title": "黑地菱形火纹",
+      "page": 922,
+      "source": "万花镜精选裁切样本",
+      "note": "红蓝菱形和黑底形成高对比，适合生成民族织锦感强的图案。",
+      "words": [
+        "万花镜",
+        "无白边",
+        "满幅纹样",
+        "二次创作"
+      ],
+      "originalCrop": "crop_047.jpg"
+    },
+    {
+      "file": "kaleido-23.jpg",
+      "category": "nature",
+      "title": "蓝地细密菱格",
+      "page": 923,
+      "source": "万花镜精选裁切样本",
+      "note": "蓝色细密菱格适合作为低调但有结构的二创底纹。",
+      "words": [
+        "万花镜",
+        "无白边",
+        "满幅纹样",
+        "二次创作"
+      ],
+      "originalCrop": "crop_050.jpg"
+    },
+    {
+      "file": "kaleido-24.jpg",
+      "category": "symbol",
+      "title": "红寿团盘局部",
+      "page": 924,
+      "source": "万花镜精选裁切样本",
+      "note": "红色寿字团盘具有明确福寿符号，适合节庆产品贴图。",
+      "words": [
+        "万花镜",
+        "无白边",
+        "满幅纹样",
+        "二次创作"
+      ],
+      "originalCrop": "crop_023.jpg"
+    },
+    {
+      "file": "kaleido-25.jpg",
+      "category": "geometry",
+      "title": "红白几何锦纹",
+      "page": 925,
+      "source": "万花镜精选裁切样本",
+      "note": "红白几何符号被连续组织，可形成节奏鲜明的镜像结构。",
+      "words": [
+        "万花镜",
+        "无白边",
+        "满幅纹样",
+        "二次创作"
+      ],
+      "originalCrop": "crop_012.jpg"
+    },
+    {
+      "file": "kaleido-26.jpg",
+      "category": "symbol",
+      "title": "红花绿藤近景",
+      "page": 926,
+      "source": "万花镜精选裁切样本",
+      "note": "花心、叶片和藤线色彩清晰，适合生成自然母题万花纹。",
+      "words": [
+        "万花镜",
+        "无白边",
+        "满幅纹样",
+        "二次创作"
+      ],
+      "originalCrop": "crop_092.jpg"
+    },
+    {
+      "file": "kaleido-27.jpg",
+      "category": "nature",
+      "title": "花枝绣线局部",
+      "page": 927,
+      "source": "万花镜精选裁切样本",
+      "note": "织绣线迹与花枝局部结合，适合表现材料质感。",
+      "words": [
+        "万花镜",
+        "无白边",
+        "满幅纹样",
+        "二次创作"
+      ],
+      "originalCrop": "crop_168.jpg"
+    },
+    {
+      "file": "kaleido-28.jpg",
+      "category": "geometry",
+      "title": "黑粉花卉剪影",
+      "page": 928,
+      "source": "万花镜精选裁切样本",
+      "note": "大花剪影和粉地形成强烈负形关系，适合生成柔性花形。",
+      "words": [
+        "万花镜",
+        "无白边",
+        "满幅纹样",
+        "二次创作"
+      ],
+      "originalCrop": "crop_010.jpg"
+    },
+    {
+      "file": "kaleido-29.jpg",
+      "category": "symbol",
+      "title": "橙白几何构成",
+      "page": 929,
+      "source": "万花镜精选裁切样本",
+      "note": "几何边框与中心图案结合，适合提取对称装饰结构。",
+      "words": [
+        "万花镜",
+        "无白边",
+        "满幅纹样",
+        "二次创作"
+      ],
+      "originalCrop": "crop_077.jpg"
+    },
+    {
+      "file": "kaleido-30.jpg",
+      "category": "space",
+      "title": "圆形团花绿底纹",
+      "page": 930,
+      "source": "万花镜精选裁切样本",
+      "note": "圆形团花和绿色底纹结合，适合生成复古团花万花样。",
+      "words": [
+        "万花镜",
+        "无白边",
+        "满幅纹样",
+        "二次创作"
+      ],
+      "originalCrop": "crop_135.jpg"
+    },
+    {
+      "file": "kaleido-31.jpg",
+      "category": "nature",
+      "title": "黑红白边饰锦",
+      "page": 931,
+      "source": "万花镜精选裁切样本",
+      "note": "黑红白连续边饰适合生成强方向性的几何纹样。",
+      "words": [
+        "万花镜",
+        "无白边",
+        "满幅纹样",
+        "二次创作"
+      ],
+      "originalCrop": "crop_067.jpg"
+    },
+    {
+      "file": "kaleido-32.jpg",
+      "category": "symbol",
+      "title": "植物点阵织纹",
+      "page": 932,
+      "source": "万花镜精选裁切样本",
+      "note": "植物轮廓和点阵织线结合，适合生成材料感更强的纹理。",
+      "words": [
+        "万花镜",
+        "无白边",
+        "满幅纹样",
+        "二次创作"
+      ],
+      "originalCrop": "crop_131.jpg"
+    },
+    {
+      "file": "kaleido-33.jpg",
+      "category": "geometry",
+      "title": "深蓝龙纹连续样",
+      "page": 933,
+      "source": "万花镜精选裁切样本",
+      "note": "龙纹和深蓝底构成连续主题，适合生成祥瑞主题二创纹。",
+      "words": [
+        "万花镜",
+        "无白边",
+        "满幅纹样",
+        "二次创作"
+      ],
+      "originalCrop": "crop_133.jpg"
+    },
+    {
+      "file": "kaleido-34.jpg",
+      "category": "symbol",
+      "title": "橙地瑞兽连续样",
+      "page": 934,
+      "source": "万花镜精选裁切样本",
+      "note": "瑞兽和橙红底组成高密度节庆纹，适合热烈的福文化图案。",
+      "words": [
+        "万花镜",
+        "无白边",
+        "满幅纹样",
+        "二次创作"
+      ],
+      "originalCrop": "crop_033.jpg"
+    }
+  ],
+  "stats": [
+    {
+      "file": "geometry-01.jpg",
+      "edge_white": 0.03246527777777778,
+      "corner_white": 0.025510204081632654,
+      "source": "original"
+    },
+    {
+      "file": "geometry-02.jpg",
+      "edge_white": 0.05668402777777778,
+      "corner_white": 0.022817460317460316,
+      "source": "original"
+    },
+    {
+      "file": "geometry-03.jpg",
+      "edge_white": 0.06979166666666667,
+      "corner_white": 0.036989795918367346,
+      "source": "original"
+    },
+    {
+      "file": "geometry-04.jpg",
+      "edge_white": 0.04583333333333333,
+      "corner_white": 0.023809523809523808,
+      "source": "original"
+    },
+    {
+      "file": "geometry-05.jpg",
+      "edge_white": 0.35529513888888886,
+      "corner_white": 0.3348922902494331,
+      "source": "original"
+    },
+    {
+      "file": "geometry-06.jpg",
+      "edge_white": 0.08532986111111111,
+      "corner_white": 0.025510204081632654,
+      "source": "original"
+    },
+    {
+      "file": "geometry-07.jpg",
+      "edge_white": 0.06362847222222222,
+      "corner_white": 0.05782312925170068,
+      "source": "original"
+    },
+    {
+      "file": "geometry-08.jpg",
+      "edge_white": 0.04739583333333333,
+      "corner_white": 0.024376417233560092,
+      "source": "original"
+    },
+    {
+      "file": "geometry-09.jpg",
+      "edge_white": 0.04548611111111111,
+      "corner_white": 0.02962018140589569,
+      "source": "original"
+    },
+    {
+      "file": "material-01.jpg",
+      "edge_white": 0.16588541666666667,
+      "corner_white": 0.14441609977324263,
+      "source": "original"
+    },
+    {
+      "file": "material-02.jpg",
+      "edge_white": 0.21970486111111112,
+      "corner_white": 0.1556122448979592,
+      "source": "original"
+    },
+    {
+      "file": "material-03.jpg",
+      "edge_white": 0.12482638888888889,
+      "corner_white": 0.08503401360544217,
+      "source": "original"
+    },
+    {
+      "file": "material-04.jpg",
+      "edge_white": 0.04626736111111111,
+      "corner_white": 0.02423469387755102,
+      "source": "original"
+    },
+    {
+      "file": "material-05.jpg",
+      "edge_white": 0.022222222222222223,
+      "corner_white": 0.00977891156462585,
+      "source": "original"
+    },
+    {
+      "file": "material-06.jpg",
+      "edge_white": 0.05008680555555556,
+      "corner_white": 0.025651927437641723,
+      "source": "original"
+    },
+    {
+      "file": "material-07.jpg",
+      "edge_white": 0.04592013888888889,
+      "corner_white": 0.023809523809523808,
+      "source": "original"
+    },
+    {
+      "file": "material-08.jpg",
+      "edge_white": 0.04973958333333333,
+      "corner_white": 0.023809523809523808,
+      "source": "original"
+    },
+    {
+      "file": "material-09.jpg",
+      "edge_white": 0.09887152777777777,
+      "corner_white": 0.07950680272108844,
+      "source": "original"
+    },
+    {
+      "file": "narrative-01.jpg",
+      "edge_white": 0.048350694444444446,
+      "corner_white": 0.026643990929705215,
+      "source": "original"
+    },
+    {
+      "file": "narrative-02.jpg",
+      "edge_white": 0.054774305555555555,
+      "corner_white": 0.03018707482993197,
+      "source": "original"
+    },
+    {
+      "file": "narrative-03.jpg",
+      "edge_white": 0.05434027777777778,
+      "corner_white": 0.07015306122448979,
+      "source": "original"
+    },
+    {
+      "file": "narrative-04.jpg",
+      "edge_white": 0.008940972222222222,
+      "corner_white": 0.0,
+      "source": "original"
+    },
+    {
+      "file": "narrative-05.jpg",
+      "edge_white": 0.06171875,
+      "corner_white": 0.04010770975056689,
+      "source": "original"
+    },
+    {
+      "file": "narrative-06.jpg",
+      "edge_white": 0.04774305555555555,
+      "corner_white": 0.02465986394557823,
+      "source": "original"
+    },
+    {
+      "file": "narrative-07.jpg",
+      "edge_white": 0.0,
+      "corner_white": 0.0,
+      "source": "original"
+    },
+    {
+      "file": "narrative-08.jpg",
+      "edge_white": 0.0,
+      "corner_white": 0.0,
+      "source": "original"
+    },
+    {
+      "file": "narrative-09.jpg",
+      "edge_white": 0.007291666666666667,
+      "corner_white": 0.011763038548752835,
+      "source": "original"
+    },
+    {
+      "file": "nature-01.jpg",
+      "edge_white": 0.07335069444444445,
+      "corner_white": 0.046910430839002266,
+      "source": "original"
+    },
+    {
+      "file": "nature-02.jpg",
+      "edge_white": 0.05677083333333333,
+      "corner_white": 0.03132086167800453,
+      "source": "original"
+    },
+    {
+      "file": "nature-03.jpg",
+      "edge_white": 0.046961805555555555,
+      "corner_white": 0.025085034013605442,
+      "source": "original"
+    },
+    {
+      "file": "nature-04.jpg",
+      "edge_white": 0.10034722222222223,
+      "corner_white": 0.07738095238095238,
+      "source": "original"
+    },
+    {
+      "file": "nature-05.jpg",
+      "edge_white": 0.04210069444444445,
+      "corner_white": 0.01984126984126984,
+      "source": "original"
+    },
+    {
+      "file": "nature-06.jpg",
+      "edge_white": 0.12578125,
+      "corner_white": 0.10884353741496598,
+      "source": "original"
+    },
+    {
+      "file": "nature-07.jpg",
+      "edge_white": 0.0,
+      "corner_white": 0.0,
+      "source": "original"
+    },
+    {
+      "file": "nature-08.jpg",
+      "edge_white": 0.05277777777777778,
+      "corner_white": 0.04124149659863945,
+      "source": "original"
+    },
+    {
+      "file": "nature-09.jpg",
+      "edge_white": 0.10303819444444444,
+      "corner_white": 0.06547619047619048,
+      "source": "original"
+    },
+    {
+      "file": "space-01.jpg",
+      "edge_white": 0.046961805555555555,
+      "corner_white": 0.0248015873015873,
+      "source": "original"
+    },
+    {
+      "file": "space-02.jpg",
+      "edge_white": 0.054600694444444445,
+      "corner_white": 0.02791950113378685,
+      "source": "original"
+    },
+    {
+      "file": "space-03.jpg",
+      "edge_white": 0.04609375,
+      "corner_white": 0.024376417233560092,
+      "source": "original"
+    },
+    {
+      "file": "space-04.jpg",
+      "edge_white": 0.1859375,
+      "corner_white": 0.13945578231292516,
+      "source": "original"
+    },
+    {
+      "file": "space-05.jpg",
+      "edge_white": 0.0546875,
+      "corner_white": 0.03713151927437642,
+      "source": "original"
+    },
+    {
+      "file": "space-06.jpg",
+      "edge_white": 0.02309027777777778,
+      "corner_white": 0.012046485260770975,
+      "source": "original"
+    },
+    {
+      "file": "space-07.jpg",
+      "edge_white": 0.0484375,
+      "corner_white": 0.026077097505668934,
+      "source": "original"
+    },
+    {
+      "file": "space-08.jpg",
+      "edge_white": 0.04583333333333333,
+      "corner_white": 0.023809523809523808,
+      "source": "original"
+    },
+    {
+      "file": "space-09.jpg",
+      "edge_white": 0.003125,
+      "corner_white": 0.003826530612244898,
+      "source": "original"
+    },
+    {
+      "file": "symbol-01.jpg",
+      "edge_white": 0.04592013888888889,
+      "corner_white": 0.023809523809523808,
+      "source": "original"
+    },
+    {
+      "file": "symbol-02.jpg",
+      "edge_white": 0.07916666666666666,
+      "corner_white": 0.06986961451247166,
+      "source": "original"
+    },
+    {
+      "file": "symbol-03.jpg",
+      "edge_white": 0.047309027777777776,
+      "corner_white": 0.03883219954648526,
+      "source": "original"
+    },
+    {
+      "file": "symbol-04.jpg",
+      "edge_white": 0.0,
+      "corner_white": 0.0,
+      "source": "original"
+    },
+    {
+      "file": "symbol-05.jpg",
+      "edge_white": 0.042534722222222224,
+      "corner_white": 0.02239229024943311,
+      "source": "original"
+    },
+    {
+      "file": "symbol-06.jpg",
+      "edge_white": 0.0,
+      "corner_white": 0.0,
+      "source": "original"
+    },
+    {
+      "file": "symbol-07.jpg",
+      "edge_white": 0.04461805555555556,
+      "corner_white": 0.02352607709750567,
+      "source": "original"
+    },
+    {
+      "file": "symbol-08.jpg",
+      "edge_white": 0.012847222222222222,
+      "corner_white": 0.017715419501133787,
+      "source": "original"
+    },
+    {
+      "file": "symbol-09.jpg",
+      "edge_white": 0.04973958333333333,
+      "corner_white": 0.01403061224489796,
+      "source": "original"
+    },
+    {
+      "file": "kaleido-01.jpg",
+      "originalCrop": "crop_161.jpg",
+      "edge_white": 0.04895833333333333,
+      "corner_white": 0.013605442176870748
+    },
+    {
+      "file": "kaleido-02.jpg",
+      "originalCrop": "crop_151.jpg",
+      "edge_white": 0.0,
+      "corner_white": 0.0
+    },
+    {
+      "file": "kaleido-03.jpg",
+      "originalCrop": "crop_160.jpg",
+      "edge_white": 0.012760416666666666,
+      "corner_white": 0.01799886621315193
+    },
+    {
+      "file": "kaleido-04.jpg",
+      "originalCrop": "crop_172.jpg",
+      "edge_white": 0.012152777777777778,
+      "corner_white": 0.017148526077097506
+    },
+    {
+      "file": "kaleido-05.jpg",
+      "originalCrop": "crop_157.jpg",
+      "edge_white": 0.0006076388888888889,
+      "corner_white": 0.0
+    },
+    {
+      "file": "kaleido-06.jpg",
+      "originalCrop": "crop_068.jpg",
+      "edge_white": 0.0035590277777777777,
+      "corner_white": 0.0002834467120181406
+    },
+    {
+      "file": "kaleido-07.jpg",
+      "originalCrop": "crop_137.jpg",
+      "edge_white": 0.0,
+      "corner_white": 0.0
+    },
+    {
+      "file": "kaleido-08.jpg",
+      "originalCrop": "crop_139.jpg",
+      "edge_white": 0.0,
+      "corner_white": 0.0
+    },
+    {
+      "file": "kaleido-09.jpg",
+      "originalCrop": "crop_097.jpg",
+      "edge_white": 0.00859375,
+      "corner_white": 0.0002834467120181406
+    },
+    {
+      "file": "kaleido-10.jpg",
+      "originalCrop": "crop_145.jpg",
+      "edge_white": 0.0,
+      "corner_white": 0.0
+    },
+    {
+      "file": "kaleido-11.jpg",
+      "originalCrop": "crop_062.jpg",
+      "edge_white": 0.05789930555555556,
+      "corner_white": 0.03840702947845805
+    },
+    {
+      "file": "kaleido-12.jpg",
+      "originalCrop": "crop_085.jpg",
+      "edge_white": 0.06380208333333333,
+      "corner_white": 0.034013605442176874
+    },
+    {
+      "file": "kaleido-13.jpg",
+      "originalCrop": "crop_009.jpg",
+      "edge_white": 0.09175347222222222,
+      "corner_white": 0.05839002267573696
+    },
+    {
+      "file": "kaleido-14.jpg",
+      "originalCrop": "crop_169.jpg",
+      "edge_white": 0.0032118055555555554,
+      "corner_white": 0.003826530612244898
+    },
+    {
+      "file": "kaleido-15.jpg",
+      "originalCrop": "crop_075.jpg",
+      "edge_white": 0.06440972222222222,
+      "corner_white": 0.05839002267573696
+    },
+    {
+      "file": "kaleido-16.jpg",
+      "originalCrop": "crop_104.jpg",
+      "edge_white": 0.0,
+      "corner_white": 0.0
+    },
+    {
+      "file": "kaleido-17.jpg",
+      "originalCrop": "crop_174.jpg",
+      "edge_white": 0.06623263888888889,
+      "corner_white": 0.0338718820861678
+    },
+    {
+      "file": "kaleido-18.jpg",
+      "originalCrop": "crop_058.jpg",
+      "edge_white": 0.3689236111111111,
+      "corner_white": 0.3473639455782313
+    },
+    {
+      "file": "kaleido-19.jpg",
+      "originalCrop": "crop_018.jpg",
+      "edge_white": 0.10868055555555556,
+      "corner_white": 0.08347505668934241
+    },
+    {
+      "file": "kaleido-20.jpg",
+      "originalCrop": "crop_088.jpg",
+      "edge_white": 0.11032986111111111,
+      "corner_white": 0.08531746031746032
+    },
+    {
+      "file": "kaleido-21.jpg",
+      "originalCrop": "crop_076.jpg",
+      "edge_white": 0.05182291666666667,
+      "corner_white": 0.02962018140589569
+    },
+    {
+      "file": "kaleido-22.jpg",
+      "originalCrop": "crop_047.jpg",
+      "edge_white": 0.08272569444444444,
+      "corner_white": 0.043934240362811794
+    },
+    {
+      "file": "kaleido-23.jpg",
+      "originalCrop": "crop_050.jpg",
+      "edge_white": 0.053125,
+      "corner_white": 0.027210884353741496
+    },
+    {
+      "file": "kaleido-24.jpg",
+      "originalCrop": "crop_023.jpg",
+      "edge_white": 0.08194444444444444,
+      "corner_white": 0.027494331065759638
+    },
+    {
+      "file": "kaleido-25.jpg",
+      "originalCrop": "crop_012.jpg",
+      "edge_white": 0.04001736111111111,
+      "corner_white": 0.02791950113378685
+    },
+    {
+      "file": "kaleido-26.jpg",
+      "originalCrop": "crop_092.jpg",
+      "edge_white": 0.14635416666666667,
+      "corner_white": 0.1030328798185941
+    },
+    {
+      "file": "kaleido-27.jpg",
+      "originalCrop": "crop_168.jpg",
+      "edge_white": 0.12135416666666667,
+      "corner_white": 0.07568027210884354
+    },
+    {
+      "file": "kaleido-28.jpg",
+      "originalCrop": "crop_010.jpg",
+      "edge_white": 0.07734375,
+      "corner_white": 0.03812358276643991
+    },
+    {
+      "file": "kaleido-29.jpg",
+      "originalCrop": "crop_077.jpg",
+      "edge_white": 0.1907986111111111,
+      "corner_white": 0.17205215419501133
+    },
+    {
+      "file": "kaleido-30.jpg",
+      "originalCrop": "crop_135.jpg",
+      "edge_white": 0.05625,
+      "corner_white": 0.046485260770975055
+    },
+    {
+      "file": "kaleido-31.jpg",
+      "originalCrop": "crop_067.jpg",
+      "edge_white": 0.10590277777777778,
+      "corner_white": 0.03897392290249433
+    },
+    {
+      "file": "kaleido-32.jpg",
+      "originalCrop": "crop_131.jpg",
+      "edge_white": 0.0671875,
+      "corner_white": 0.03755668934240363
+    },
+    {
+      "file": "kaleido-33.jpg",
+      "originalCrop": "crop_133.jpg",
+      "edge_white": 0.05677083333333333,
+      "corner_white": 0.03018707482993197
+    },
+    {
+      "file": "kaleido-34.jpg",
+      "originalCrop": "crop_033.jpg",
+      "edge_white": 0.06649305555555556,
+      "corner_white": 0.03642290249433107
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+# White handle and neutral body placeholders; app replaces mug_body with selected pattern.
+newmtl mug_body
+Ka 1.000 1.000 1.000
+Kd 1.000 1.000 1.000
+Ks 0.180 0.180 0.180
+Ns 90.000
+illum 2
+
+newmtl mug_handle
+Ka 1.000 1.000 1.000
+Kd 0.960 0.950 0.930
+Ks 0.260 0.260 0.260
+Ns 120.000
+illum 2

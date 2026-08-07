@@ -1,0 +1,596 @@
+[
+  {
+    "file": "narrative-01.jpg",
+    "category": "narrative",
+    "sourceIndex": 4,
+    "sourcePath": "artifact_work/brocade_general/page_images/page_233.jpg",
+    "page": 233,
+    "size": [
+      911,
+      1551
+    ]
+  },
+  {
+    "file": "narrative-02.jpg",
+    "category": "narrative",
+    "sourceIndex": 33,
+    "sourcePath": "artifact_work/brocade_general/page_images/page_179.jpg",
+    "page": 179,
+    "size": [
+      1169,
+      1800
+    ]
+  },
+  {
+    "file": "narrative-03.jpg",
+    "category": "narrative",
+    "sourceIndex": 41,
+    "sourcePath": "artifact_work/brocade_general/page_images/page_143.jpg",
+    "page": 143,
+    "size": [
+      1255,
+      1800
+    ]
+  },
+  {
+    "file": "narrative-04.jpg",
+    "category": "narrative",
+    "sourceIndex": 97,
+    "sourcePath": "artifact_work/brocade_03/page_images/page_073.jpg",
+    "page": 73,
+    "size": [
+      1326,
+      1800
+    ]
+  },
+  {
+    "file": "narrative-05.jpg",
+    "category": "narrative",
+    "sourceIndex": 129,
+    "sourcePath": "artifact_work/brocade_03/page_images/page_175.jpg",
+    "page": 175,
+    "size": [
+      1109,
+      1800
+    ]
+  },
+  {
+    "file": "narrative-06.jpg",
+    "category": "narrative",
+    "sourceIndex": 136,
+    "sourcePath": "fu_candidate_pages/pdf_155.jpg",
+    "page": 155,
+    "size": [
+      891,
+      1331
+    ]
+  },
+  {
+    "file": "narrative-07.jpg",
+    "category": "narrative",
+    "sourceIndex": 151,
+    "sourcePath": "fu_candidate_pages/pdf_113.jpg",
+    "page": 113,
+    "size": [
+      1611,
+      1719
+    ]
+  },
+  {
+    "file": "narrative-08.jpg",
+    "category": "narrative",
+    "sourceIndex": 154,
+    "sourcePath": "fu_candidate_pages/pdf_125.jpg",
+    "page": 125,
+    "size": [
+      1611,
+      1719
+    ]
+  },
+  {
+    "file": "narrative-09.jpg",
+    "category": "narrative",
+    "sourceIndex": 158,
+    "sourcePath": "fu_candidate_pages/pdf_154.jpg",
+    "page": 154,
+    "size": [
+      1611,
+      1719
+    ]
+  },
+  {
+    "file": "nature-01.jpg",
+    "category": "nature",
+    "sourceIndex": 9,
+    "sourcePath": "artifact_work/brocade_general/page_images/page_187.jpg",
+    "page": 187,
+    "size": [
+      1800,
+      1342
+    ]
+  },
+  {
+    "file": "nature-02.jpg",
+    "category": "nature",
+    "sourceIndex": 10,
+    "sourcePath": "artifact_work/brocade_general/page_images/page_138.jpg",
+    "page": 138,
+    "size": [
+      814,
+      1256
+    ]
+  },
+  {
+    "file": "nature-03.jpg",
+    "category": "nature",
+    "sourceIndex": 13,
+    "sourcePath": "artifact_work/brocade_general/page_images/page_007.jpg",
+    "page": 7,
+    "size": [
+      241,
+      200
+    ]
+  },
+  {
+    "file": "nature-04.jpg",
+    "category": "nature",
+    "sourceIndex": 18,
+    "sourcePath": "artifact_work/brocade_general/page_images/page_110.jpg",
+    "page": 110,
+    "size": [
+      1311,
+      876
+    ]
+  },
+  {
+    "file": "nature-05.jpg",
+    "category": "nature",
+    "sourceIndex": 42,
+    "sourcePath": "artifact_work/brocade_general/page_images/page_190.jpg",
+    "page": 190,
+    "size": [
+      1755,
+      1800
+    ]
+  },
+  {
+    "file": "nature-06.jpg",
+    "category": "nature",
+    "sourceIndex": 92,
+    "sourcePath": "artifact_work/brocade_03/page_images/page_050.jpg",
+    "page": 50,
+    "size": [
+      837,
+      1422
+    ]
+  },
+  {
+    "file": "nature-07.jpg",
+    "category": "nature",
+    "sourceIndex": 104,
+    "sourcePath": "artifact_work/brocade_03/page_images/page_149.jpg",
+    "page": 149,
+    "size": [
+      1326,
+      1800
+    ]
+  },
+  {
+    "file": "nature-08.jpg",
+    "category": "nature",
+    "sourceIndex": 148,
+    "sourcePath": "fu_candidate_pages/pdf_063.jpg",
+    "page": 63,
+    "size": [
+      1800,
+      1161
+    ]
+  },
+  {
+    "file": "nature-09.jpg",
+    "category": "nature",
+    "sourceIndex": 168,
+    "sourcePath": "pdf_pages_all/pdf_013.jpg",
+    "page": 13,
+    "size": [
+      1800,
+      898
+    ]
+  },
+  {
+    "file": "geometry-01.jpg",
+    "category": "geometry",
+    "sourceIndex": 12,
+    "sourcePath": "artifact_work/brocade_general/page_images/page_076.jpg",
+    "page": 76,
+    "size": [
+      855,
+      1152
+    ]
+  },
+  {
+    "file": "geometry-02.jpg",
+    "category": "geometry",
+    "sourceIndex": 43,
+    "sourcePath": "artifact_work/brocade_general/page_images/page_156.jpg",
+    "page": 156,
+    "size": [
+      1083,
+      1187
+    ]
+  },
+  {
+    "file": "geometry-03.jpg",
+    "category": "geometry",
+    "sourceIndex": 47,
+    "sourcePath": "artifact_work/national_brocade/page_images/page_241.jpg",
+    "page": 241,
+    "size": [
+      698,
+      747
+    ]
+  },
+  {
+    "file": "geometry-04.jpg",
+    "category": "geometry",
+    "sourceIndex": 50,
+    "sourcePath": "artifact_work/national_brocade/page_images/page_181.jpg",
+    "page": 181,
+    "size": [
+      1264,
+      886
+    ]
+  },
+  {
+    "file": "geometry-05.jpg",
+    "category": "geometry",
+    "sourceIndex": 58,
+    "sourcePath": "artifact_work/national_brocade/page_images/page_152.jpg",
+    "page": 152,
+    "size": [
+      770,
+      562
+    ]
+  },
+  {
+    "file": "geometry-06.jpg",
+    "category": "geometry",
+    "sourceIndex": 67,
+    "sourcePath": "artifact_work/national_brocade/page_images/page_180.jpg",
+    "page": 180,
+    "size": [
+      840,
+      625
+    ]
+  },
+  {
+    "file": "geometry-07.jpg",
+    "category": "geometry",
+    "sourceIndex": 75,
+    "sourcePath": "artifact_work/national_brocade/page_images/page_134.jpg",
+    "page": 134,
+    "size": [
+      1305,
+      867
+    ]
+  },
+  {
+    "file": "geometry-08.jpg",
+    "category": "geometry",
+    "sourceIndex": 83,
+    "sourcePath": "artifact_work/national_brocade/page_images/page_147.jpg",
+    "page": 147,
+    "size": [
+      1800,
+      912
+    ]
+  },
+  {
+    "file": "geometry-09.jpg",
+    "category": "geometry",
+    "sourceIndex": 167,
+    "sourcePath": "pdf_pages_all/pdf_147.jpg",
+    "page": 147,
+    "size": [
+      1433,
+      1427
+    ]
+  },
+  {
+    "file": "material-01.jpg",
+    "category": "material",
+    "sourceIndex": 21,
+    "sourcePath": "artifact_work/brocade_general/page_images/page_044.jpg",
+    "page": 44,
+    "size": [
+      752,
+      1131
+    ]
+  },
+  {
+    "file": "material-02.jpg",
+    "category": "material",
+    "sourceIndex": 31,
+    "sourcePath": "artifact_work/brocade_general/page_images/page_030.jpg",
+    "page": 30,
+    "size": [
+      1048,
+      876
+    ]
+  },
+  {
+    "file": "material-03.jpg",
+    "category": "material",
+    "sourceIndex": 46,
+    "sourcePath": "artifact_work/national_brocade/page_images/page_267.jpg",
+    "page": 267,
+    "size": [
+      852,
+      760
+    ]
+  },
+  {
+    "file": "material-04.jpg",
+    "category": "material",
+    "sourceIndex": 51,
+    "sourcePath": "artifact_work/national_brocade/page_images/page_292.jpg",
+    "page": 292,
+    "size": [
+      1035,
+      1394
+    ]
+  },
+  {
+    "file": "material-05.jpg",
+    "category": "material",
+    "sourceIndex": 57,
+    "sourcePath": "artifact_work/national_brocade/page_images/page_314.jpg",
+    "page": 314,
+    "size": [
+      618,
+      923
+    ]
+  },
+  {
+    "file": "material-06.jpg",
+    "category": "material",
+    "sourceIndex": 73,
+    "sourcePath": "artifact_work/national_brocade/page_images/page_275.jpg",
+    "page": 275,
+    "size": [
+      1096,
+      544
+    ]
+  },
+  {
+    "file": "material-07.jpg",
+    "category": "material",
+    "sourceIndex": 74,
+    "sourcePath": "artifact_work/national_brocade/page_images/page_166.jpg",
+    "page": 166,
+    "size": [
+      951,
+      638
+    ]
+  },
+  {
+    "file": "material-08.jpg",
+    "category": "material",
+    "sourceIndex": 91,
+    "sourcePath": "artifact_work/brocade_03/page_images/page_198.jpg",
+    "page": 198,
+    "size": [
+      1800,
+      821
+    ]
+  },
+  {
+    "file": "material-09.jpg",
+    "category": "material",
+    "sourceIndex": 107,
+    "sourcePath": "artifact_work/brocade_03/page_images/page_054.jpg",
+    "page": 54,
+    "size": [
+      1800,
+      866
+    ]
+  },
+  {
+    "file": "symbol-01.jpg",
+    "category": "symbol",
+    "sourceIndex": 23,
+    "sourcePath": "artifact_work/brocade_general/page_images/page_035.jpg",
+    "page": 35,
+    "size": [
+      1800,
+      1113
+    ]
+  },
+  {
+    "file": "symbol-02.jpg",
+    "category": "symbol",
+    "sourceIndex": 119,
+    "sourcePath": "artifact_work/brocade_03/page_images/page_180.jpg",
+    "page": 180,
+    "size": [
+      619,
+      605
+    ]
+  },
+  {
+    "file": "symbol-03.jpg",
+    "category": "symbol",
+    "sourceIndex": 135,
+    "sourcePath": "fu_candidate_pages/pdf_074.jpg",
+    "page": 74,
+    "size": [
+      1800,
+      1795
+    ]
+  },
+  {
+    "file": "symbol-04.jpg",
+    "category": "symbol",
+    "sourceIndex": 139,
+    "sourcePath": "fu_candidate_pages/pdf_161.jpg",
+    "page": 161,
+    "size": [
+      1800,
+      1781
+    ]
+  },
+  {
+    "file": "symbol-05.jpg",
+    "category": "symbol",
+    "sourceIndex": 143,
+    "sourcePath": "fu_candidate_pages/pdf_127.jpg",
+    "page": 127,
+    "size": [
+      1399,
+      1420
+    ]
+  },
+  {
+    "file": "symbol-06.jpg",
+    "category": "symbol",
+    "sourceIndex": 145,
+    "sourcePath": "fu_candidate_pages/pdf_126.jpg",
+    "page": 126,
+    "size": [
+      1800,
+      1706
+    ]
+  },
+  {
+    "file": "symbol-07.jpg",
+    "category": "symbol",
+    "sourceIndex": 153,
+    "sourcePath": "fu_candidate_pages/pdf_062.jpg",
+    "page": 62,
+    "size": [
+      1800,
+      1738
+    ]
+  },
+  {
+    "file": "symbol-08.jpg",
+    "category": "symbol",
+    "sourceIndex": 160,
+    "sourcePath": "fu_candidate_pages/pdf_061.jpg",
+    "page": 61,
+    "size": [
+      1611,
+      1719
+    ]
+  },
+  {
+    "file": "symbol-09.jpg",
+    "category": "symbol",
+    "sourceIndex": 161,
+    "sourcePath": "fu_candidate_pages/pdf_131.jpg",
+    "page": 131,
+    "size": [
+      1611,
+      1719
+    ]
+  },
+  {
+    "file": "space-01.jpg",
+    "category": "space",
+    "sourceIndex": 27,
+    "sourcePath": "artifact_work/brocade_general/page_images/page_149.jpg",
+    "page": 149,
+    "size": [
+      1342,
+      1800
+    ]
+  },
+  {
+    "file": "space-02.jpg",
+    "category": "space",
+    "sourceIndex": 32,
+    "sourcePath": "artifact_work/brocade_general/page_images/page_086.jpg",
+    "page": 86,
+    "size": [
+      738,
+      966
+    ]
+  },
+  {
+    "file": "space-03.jpg",
+    "category": "space",
+    "sourceIndex": 35,
+    "sourcePath": "artifact_work/brocade_general/page_images/page_020.jpg",
+    "page": 20,
+    "size": [
+      1311,
+      1076
+    ]
+  },
+  {
+    "file": "space-04.jpg",
+    "category": "space",
+    "sourceIndex": 55,
+    "sourcePath": "artifact_work/national_brocade/page_images/page_101.jpg",
+    "page": 101,
+    "size": [
+      1800,
+      1457
+    ]
+  },
+  {
+    "file": "space-05.jpg",
+    "category": "space",
+    "sourceIndex": 62,
+    "sourcePath": "artifact_work/national_brocade/page_images/page_153.jpg",
+    "page": 153,
+    "size": [
+      1800,
+      903
+    ]
+  },
+  {
+    "file": "space-06.jpg",
+    "category": "space",
+    "sourceIndex": 81,
+    "sourcePath": "artifact_work/national_brocade/page_images/page_248.jpg",
+    "page": 248,
+    "size": [
+      1800,
+      771
+    ]
+  },
+  {
+    "file": "space-07.jpg",
+    "category": "space",
+    "sourceIndex": 85,
+    "sourcePath": "artifact_work/national_brocade/page_images/page_185.jpg",
+    "page": 185,
+    "size": [
+      733,
+      1291
+    ]
+  },
+  {
+    "file": "space-08.jpg",
+    "category": "space",
+    "sourceIndex": 128,
+    "sourcePath": "artifact_work/brocade_03/page_images/page_162.jpg",
+    "page": 162,
+    "size": [
+      1328,
+      1800
+    ]
+  },
+  {
+    "file": "space-09.jpg",
+    "category": "space",
+    "sourceIndex": 169,
+    "sourcePath": "pdf_pages_all/pdf_100.jpg",
+    "page": 100,
+    "size": [
+      1611,
+      1719
+    ]
+  }
+]
