@@ -28,6 +28,6 @@
 - `makehuman-f-dress-11/`: MakeHuman Community `F Dress 11` by Mindfront, CC-BY - Creative Commons Attribution. Source page: http://www.makehumancommunity.org/node/1703.
 - `kenney_furniture/*.glb`: Kenney Furniture Kit, Creative Commons CC0, https://kenney.nl/assets/furniture-kit.
 - `kenney_food/*.glb`: Kenney Food Kit, Creative Commons CC0, https://kenney.nl/assets/food-kit.
-- `user_mug_14/`: user-supplied OBJ model derived from `/Users/chaoyue/Desktop/OBJ_C181/MUG 14.obj`; split into body and handle material regions for the local product mockup.
+- `user_mug_14/`: user-supplied `MUG 14.obj` model; split into body and handle material regions for the product mockup.
 
 `corset.glb` at the model root is not used by the app.
