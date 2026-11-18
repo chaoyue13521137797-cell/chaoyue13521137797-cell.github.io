@@ -264,24 +264,68 @@ const curatedBrocadeAssets = [
 
 const assetMedia = new Map();
 
+function isDrawableMedia(media) {
+  if (!media) return false;
+  if (typeof media.naturalWidth === "number") {
+    return media.complete && media.naturalWidth > 0 && media.naturalHeight > 0;
+  }
+  if (typeof media.videoWidth === "number") {
+    return media.readyState >= 2 && media.videoWidth > 0 && media.videoHeight > 0;
+  }
+  return media.width > 0 && media.height > 0;
+}
+
+function ensureAssetImage(image) {
+  if (!image?._assetUrl || image._assetStarted) return image;
+  image._assetStarted = true;
+  image._assetAttempts += 1;
+  const separator = image._assetUrl.includes("?") ? "&" : "?";
+  const retry = image._assetAttempts > 1 ? `${separator}asset_retry=${image._assetAttempts}` : "";
+  image.src = `${image._assetUrl}${retry}`;
+  return image;
+}
+
+function sampleImageUrl(sample) {
+  const url = sample?.image?._assetUrl || sample?.image?.src || sample?.tile?.src || "";
+  return url ? new URL(url, document.baseURI).href : "";
+}
+
+function createAssetImage(url, deferred = false) {
+  const image = new Image();
+  image.decoding = "async";
+  image._assetUrl = url;
+  image._assetAttempts = 0;
+  image.onload = () => {
+    imageLoads += 1;
+    state.needsRender = true;
+    state.designNeedsRender = true;
+    designFallback.key = "";
+    if (state.activeView === "detail" && currentSample()?.image === image) {
+      ui.detailImage.src = image.currentSrc || image.src;
+    }
+    if (state.activeView === "product-design") {
+      const sample = currentDesignSample();
+      if (sample?.image === image || sample?.tile === image) updateDesignTexture();
+    }
+  };
+  image.onerror = () => {
+    if (image._assetAttempts >= 3 || image._assetUrl.startsWith("data:")) return;
+    window.setTimeout(() => {
+      image._assetStarted = false;
+      ensureAssetImage(image);
+    }, image._assetAttempts * 900);
+  };
+  if (!deferred) ensureAssetImage(image);
+  return image;
+}
+
 function mediaForAsset(asset) {
   const imageBase = asset.imageBase || brocadeImageBase;
   const tileBase = asset.tileBase || brocadeTileBase;
   const mediaKey = `${imageBase}/${asset.file}`;
   if (assetMedia.has(mediaKey)) return assetMedia.get(mediaKey);
-  const image = new Image();
-  const tile = new Image();
-  image.decoding = "async";
-  tile.decoding = "async";
-  image.src = `${imageBase}/${asset.file}`;
-  tile.src = `${tileBase}/${asset.file}`;
-  image.onload = () => {
-    imageLoads += 1;
-    state.needsRender = true;
-  };
-  tile.onload = () => {
-    state.needsRender = true;
-  };
+  const image = createAssetImage(`${imageBase}/${asset.file}`, true);
+  const tile = createAssetImage(`${tileBase}/${asset.file}`);
   const media = { image, tile };
   assetMedia.set(mediaKey, media);
   return media;
@@ -528,6 +572,14 @@ const design3d = {
   distance: 6.8,
   ready: false
 };
+
+function setDesignStatus(message = "") {
+  const help = ui.designStage?.querySelector(".design-help");
+  if (!help) return;
+  help.textContent = message || "拖动旋转 / 滚轮缩放 / Shift 平移";
+  help.setAttribute("aria-live", "polite");
+}
+
 const designFallback = {
   key: "",
   canvas: null,
@@ -849,7 +901,8 @@ function drawSample(sample) {
   if (screen.x < -30 || screen.x > state.width + 30 || screen.y < -30 || screen.y > state.height + 30) return;
   const selected = state.selectedId === sample.id;
   const hover = state.hoverId === sample.id;
-  const source = state.mode === "color" || state.scale < 1.08 ? sample.colorTile : sample.tile;
+  const source = state.mode === "color" || state.scale < 1.08 || !isDrawableMedia(sample.tile)
+    ? sample.colorTile : sample.tile;
   ctx.save();
   ctx.globalAlpha = selected || hover ? 1 : 0.84;
   if (selected || hover) {
@@ -875,9 +928,10 @@ function render() {
 
 function sourceImageFor(sample, preferFull = false) {
   if (!sample) return null;
-  if (preferFull && sample.image?.complete) return sample.image;
-  if (sample.tile?.complete) return sample.tile;
-  return sample.image?.complete ? sample.image : null;
+  if (preferFull) ensureAssetImage(sample.image);
+  if (preferFull && isDrawableMedia(sample.image)) return sample.image;
+  if (isDrawableMedia(sample.tile)) return sample.tile;
+  return isDrawableMedia(sample.image) ? sample.image : null;
 }
 
 function drawableSize(media) {
@@ -896,6 +950,7 @@ function mediaHeight(media) {
 }
 
 function drawImageCover(targetCtx, img, width, height) {
+  if (!isDrawableMedia(img)) return;
   const sourceW = mediaWidth(img);
   const sourceH = mediaHeight(img);
   const scale = Math.max(width / sourceW, height / sourceH);
@@ -905,6 +960,7 @@ function drawImageCover(targetCtx, img, width, height) {
 }
 
 function drawImageCoverBleed(targetCtx, img, width, height, bleed = 1.035) {
+  if (!isDrawableMedia(img)) return;
   const sourceW = mediaWidth(img);
   const sourceH = mediaHeight(img);
   const scale = Math.max(width / sourceW, height / sourceH) * bleed;
@@ -984,6 +1040,7 @@ function trimmedSourceRect(img) {
 }
 
 function drawImageCoverTrimmed(targetCtx, img, width, height) {
+  if (!isDrawableMedia(img)) return;
   const rect = trimmedSourceRect(img);
   const scale = Math.max(width / rect.sw, height / rect.sh);
   const drawW = rect.sw * scale;
@@ -1019,6 +1076,7 @@ function designTileSourceRect(img) {
 }
 
 function drawImageCoverFromRect(targetCtx, img, rect, width, height) {
+  if (!isDrawableMedia(img)) return;
   const scale = Math.max(width / rect.sw, height / rect.sh);
   const drawW = rect.sw * scale;
   const drawH = rect.sh * scale;
@@ -1026,6 +1084,7 @@ function drawImageCoverFromRect(targetCtx, img, rect, width, height) {
 }
 
 function drawImageContain(targetCtx, img, width, height) {
+  if (!isDrawableMedia(img)) return;
   const sourceW = mediaWidth(img);
   const sourceH = mediaHeight(img);
   const scale = Math.min(width / sourceW, height / sourceH);
@@ -1378,7 +1437,7 @@ function designSources() {
       type: "sample",
       label: sampleDisplayTitle(sample),
       sample,
-      src: sample.image?.src || sample.tile?.src || ""
+      src: sampleImageUrl(sample)
     });
   });
   return sources;
@@ -1391,7 +1450,7 @@ function fallbackDesignSource(source) {
     type: "fallback",
     label: sampleDisplayTitle(sample) || "当前纹样",
     sample,
-    src: source?.frame || sample?.image?.src || sample?.tile?.src || ""
+    src: source?.frame || sampleImageUrl(sample)
   };
 }
 
@@ -1424,7 +1483,7 @@ function tdSourceFromSample(sample) {
   return {
     key: `sample-${sample.id}`,
     label: sample.asset?.title || sample.category?.label || "纹样",
-    src: sample.image?.src || sample.tile?.src || ""
+    src: sampleImageUrl(sample)
   };
 }
 
@@ -1717,7 +1776,7 @@ function drawToeMirror(ctx, sourceCanvas, width, height, degrees) {
 }
 
 function toeSourceForFrame(frame) {
-  if (frame?.sourceFrameImage?.complete) return frame.sourceFrameImage;
+  if (isDrawableMedia(frame?.sourceFrameImage)) return frame.sourceFrameImage;
   if (frame?.frame) {
     const image = new Image();
     image.decoding = "async";
@@ -1733,13 +1792,13 @@ function toeSourceForFrame(frame) {
 }
 
 function toeCurrentSourceImage() {
-  if (state.effectFrameImage?.complete) return state.effectFrameImage;
+  if (isDrawableMedia(state.effectFrameImage)) return state.effectFrameImage;
   const sample = state.effectSource || currentSample() || samples[0];
-  return sample?.image?.complete ? sample.image : sample?.tile;
+  return sourceImageFor(sample, true);
 }
 
 function drawToeSourceProgram(targetCtx, targetWidth, targetHeight, sourceImage, options = {}) {
-  const img = sourceImage?.complete ? sourceImage : sourceImage;
+  const img = isDrawableMedia(sourceImage) ? sourceImage : null;
   if (!img || !mediaWidth(img)) return false;
   const width = Math.max(1, Math.round(targetWidth));
   const height = Math.max(1, Math.round(targetHeight));
@@ -1816,7 +1875,7 @@ function finishOfflineToeFrame(targetCtx, width, height, time, options = {}) {
 }
 
 function drawOfflineToeAccent(targetCtx, width, height, source, time, options = {}) {
-  if (!offlineToeProgramCtx || !source?.complete || !mediaWidth(source)) return;
+  if (!offlineToeProgramCtx || !isDrawableMedia(source) || !mediaWidth(source)) return;
   if (offlineToeProgramCanvas.width !== width || offlineToeProgramCanvas.height !== height) {
     offlineToeProgramCanvas.width = width;
     offlineToeProgramCanvas.height = height;
@@ -1831,7 +1890,7 @@ function drawOfflineToeAccent(targetCtx, width, height, source, time, options = 
 }
 
 function drawOfflineTouchDesignerFrame(targetCtx, targetWidth, targetHeight, source, time) {
-  if (!offlineToeProgramCtx || !source?.complete || !mediaWidth(source)) return false;
+  if (!offlineToeProgramCtx || !isDrawableMedia(source) || !mediaWidth(source)) return false;
   const width = Math.max(1, Math.round(targetWidth));
   const height = Math.max(1, Math.round(targetHeight));
   const renderScale = Math.min(window.devicePixelRatio || 1, 2);
@@ -1852,7 +1911,7 @@ function drawWebGeneratedToeFrame(targetCtx, targetWidth, targetHeight, options 
   const width = Math.max(1, Math.round(targetWidth));
   const height = Math.max(1, Math.round(targetHeight));
   const source = options.source || toeCurrentSourceImage();
-  if (source?.complete && mediaWidth(source)) {
+  if (isDrawableMedia(source) && mediaWidth(source)) {
     const time = options.time ?? state.effectTime ?? performance.now() / 1000;
     return drawOfflineTouchDesignerFrame(targetCtx, width, height, source, time);
   }
@@ -1948,7 +2007,7 @@ function requestTdLiveFrame(force = false) {
 }
 
 function tdLiveOnline() {
-  return tdLive.ready && frameIsCurrent(tdLive.frameLoadedAt) && tdLive.image.complete && mediaWidth(tdLive.image) > 1;
+  return tdLive.ready && frameIsCurrent(tdLive.frameLoadedAt) && isDrawableMedia(tdLive.image) && mediaWidth(tdLive.image) > 1;
 }
 
 function drawTdLiveFrame(targetCtx, targetWidth, targetHeight, options = {}) {
@@ -2117,7 +2176,7 @@ function handlePageVisibilityChange() {
 
 function currentLiveImageSource() {
   if (!USE_TOUCHDESIGNER_BRIDGE && experienceCanvas?.width) return experienceCanvas;
-  if (ui.experienceLiveImage?.complete && mediaWidth(ui.experienceLiveImage) > 1) return ui.experienceLiveImage;
+  if (isDrawableMedia(ui.experienceLiveImage) && mediaWidth(ui.experienceLiveImage) > 1) return ui.experienceLiveImage;
   if (tdLiveOnline()) return tdLive.image;
   return null;
 }
@@ -2395,7 +2454,7 @@ function fillPortablePatternLayer(targetCtx, tile, width, height, time, options 
 }
 
 function drawPortableKaleidoscopeFrame(targetCtx, targetWidth, targetHeight, img, options = {}) {
-  if (!img?.complete || !mediaWidth(img)) return false;
+  if (!isDrawableMedia(img) || !mediaWidth(img)) return false;
   const width = Math.max(1, Math.round(targetWidth));
   const height = Math.max(1, Math.round(targetHeight));
   const time = options.time ?? performance.now() / 1000;
@@ -2471,7 +2530,7 @@ function drawKaleidoscopeCluster(targetCtx, motif, x, y, size, rotation, alpha, 
 }
 
 function drawTdMirrorEffect(targetCtx, targetWidth, targetHeight, img, options = {}) {
-  if (!img?.complete || !mediaWidth(img)) return;
+  if (!isDrawableMedia(img) || !mediaWidth(img)) return;
   const time = options.time ?? performance.now() / 1000;
   const card = !!options.card;
   const width = Math.max(1, Math.round(targetWidth));
@@ -2554,7 +2613,7 @@ function drawTdMirrorEffect(targetCtx, targetWidth, targetHeight, img, options =
 
 function renderTdMirrorCanvas(canvas) {
   const img = canvas._tdImage;
-  if (!img?.complete) return;
+  if (!isDrawableMedia(img)) return;
   const rect = canvas.getBoundingClientRect();
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
   const width = Math.max(1, Math.round(rect.width));
@@ -2586,7 +2645,7 @@ function createTdMirrorPreview(src, options = {}) {
 
 function renderToeProgramPreviewCanvas(canvas) {
   const img = canvas._tdImage;
-  if (!img?.complete || !mediaWidth(img)) return;
+  if (!isDrawableMedia(img) || !mediaWidth(img)) return;
   const rect = canvas.getBoundingClientRect();
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
   const width = Math.max(1, Math.round(rect.width));
@@ -2629,7 +2688,7 @@ function collectionVisualSource() {
     || samples.find((entry) => entry.file === "kaleido-16.jpg")
     || samples.find((entry) => entry.file === "kaleido-26.jpg")
     || samples[0];
-  return sample?.image?.src || sample?.tile?.src || "";
+  return sampleImageUrl(sample);
 }
 
 function clearTdCollectionStage() {
@@ -2748,17 +2807,17 @@ function applyDesignSource(entry) {
   state.designPatternImage = null;
   sendTouchDesignerInput({ key: entry.key, label: entry.label, src: entry.src });
   if (state.designPatternUrl) {
-    const image = new Image();
-    image.onload = () => {
+    const image = createAssetImage(state.designPatternUrl, true);
+    image.addEventListener("load", () => {
       if (state.designSourceKey !== entry.key) return;
       state.designPatternImage = image;
       designFallback.key = "";
       designFallback.canvas = null;
       updateDesignTexture();
       renderDesign();
-    };
-    image.src = state.designPatternUrl;
-    if (image.complete) state.designPatternImage = image;
+    });
+    ensureAssetImage(image);
+    if (isDrawableMedia(image)) state.designPatternImage = image;
   }
   updateDesignPatternInfo();
   renderTranslationPathCard();
@@ -2770,7 +2829,7 @@ function applyDesignSource(entry) {
 function designPatternSource() {
   if (state.designPatternUrl) return state.designPatternUrl;
   const sample = currentDesignSample();
-  return sample?.image?.complete ? sample.image.src : sample?.tile?.src || "";
+  return isDrawableMedia(sample?.image) ? sampleImageUrl(sample) : sample?.tile?.src || sampleImageUrl(sample);
 }
 
 function updateStaticDesignModel() {
@@ -2789,7 +2848,7 @@ function updateDesignPatternInfo() {
   const source = designPatternSource();
   if (ui.designPatternPreview) ui.designPatternPreview.src = source;
   updateStaticDesignModel();
-  const img = state.designPatternImage?.complete ? state.designPatternImage : currentDesignSample()?.image;
+  const img = isDrawableMedia(state.designPatternImage) ? state.designPatternImage : currentDesignSample()?.image;
   if (ui.designPatternSize && img) {
     const width = img.naturalWidth || 512;
     const height = img.naturalHeight || 512;
@@ -2809,7 +2868,7 @@ function makePatternCanvas(image, size = 768) {
   const pctx = patternCanvas.getContext("2d");
   pctx.fillStyle = "#f7f7f7";
   pctx.fillRect(0, 0, size, size);
-  if (!image) return patternCanvas;
+  if (!isDrawableMedia(image)) return patternCanvas;
   const tileSize = size / 2;
   const sourceRect = designTileSourceRect(image);
   const rotation = (state.designPatternRotation - 0.5) * Math.PI * 0.5;
@@ -3061,7 +3120,7 @@ function ensureMockupImage(config) {
   };
   image.src = config.image;
   designFallback.mockupImage = image;
-  designFallback.mockupLoaded = image.complete;
+  designFallback.mockupLoaded = isDrawableMedia(image);
   return image;
 }
 
@@ -3129,8 +3188,8 @@ function renderPhotoMockupDesign(config, sourceImage, sourceKey, patternCanvas, 
     state.designScale.toFixed(3),
     design3d.panX.toFixed(3),
     design3d.panY.toFixed(3),
-    mockup?.complete ? "mockup-ready" : "mockup-loading",
-    sourceImage?.complete ? "ready" : "loading"
+    isDrawableMedia(mockup) ? "mockup-ready" : "mockup-loading",
+    isDrawableMedia(sourceImage) ? "ready" : "loading"
   ].join("|");
   if (designFallback.key === key) return true;
   designFallback.key = key;
@@ -3139,7 +3198,7 @@ function renderPhotoMockupDesign(config, sourceImage, sourceKey, patternCanvas, 
   ctx.clearRect(0, 0, width, height);
   ctx.fillStyle = "#f7f5f1";
   ctx.fillRect(0, 0, width, height);
-  if (!mockup?.complete) {
+  if (!isDrawableMedia(mockup)) {
     ctx.fillStyle = "#1c1c1c";
     ctx.font = "700 16px sans-serif";
     ctx.fillText(`正在载入${config.label || "产品"}样机`, 40, 60);
@@ -3200,7 +3259,7 @@ function renderFallbackDesign() {
   const surface = resizeFallbackCanvas();
   if (!surface) return;
   const { ctx: fallbackCtx, width, height } = surface;
-  const sourceImage = state.designPatternImage?.complete ? state.designPatternImage : sourceImageFor(currentDesignSample(), true);
+  const sourceImage = isDrawableMedia(state.designPatternImage) ? state.designPatternImage : sourceImageFor(currentDesignSample(), true);
   const sourceKey = sourceImage?.currentSrc || sourceImage?.src || "";
   const cx = width * 0.55 + design3d.panX * 42;
   const cy = height * 0.52 + design3d.panY * 42;
@@ -3222,7 +3281,7 @@ function renderFallbackDesign() {
     state.designTiling,
     viewKey,
     sourceKey,
-    sourceImage?.complete ? "ready" : "loading"
+    isDrawableMedia(sourceImage) ? "ready" : "loading"
   ].join("|");
   if (designFallback.key === key) return;
   designFallback.key = key;
@@ -3292,7 +3351,7 @@ function updateDesignTexture() {
   renderFallbackDesign();
   if (!THREE || !design3d.material) return;
   const sample = currentDesignSample();
-  const sourceImage = state.designPatternImage?.complete ? state.designPatternImage : sourceImageFor(sample, true);
+  const sourceImage = isDrawableMedia(state.designPatternImage) ? state.designPatternImage : sourceImageFor(sample, true);
   const patternCanvas = makePatternCanvas(sourceImage, 768);
   if (design3d.texture) design3d.texture.dispose();
   design3d.texture = new THREE.CanvasTexture(patternCanvas);
@@ -3559,12 +3618,21 @@ function fitModelToStage(model, config) {
   if (config.position) model.position.add(new THREE.Vector3(...config.position));
 }
 
+async function retryModelLoad(load) {
+  try {
+    return await load();
+  } catch {
+    await new Promise((resolve) => window.setTimeout(resolve, 900));
+    return load();
+  }
+}
+
 async function loadProductModel(config) {
   if (config.obj) {
     if (!OBJLoader) return null;
     const cacheKey = `${config.obj}|${config.mtl || ""}`;
     if (!design3d.modelCache.has(cacheKey)) {
-      const loadPromise = (async () => {
+      const loadPromise = retryModelLoad(async () => {
         let objectLoader = new OBJLoader();
         if (config.mtl && MTLLoader) {
           const materialLoader = new MTLLoader();
@@ -3577,7 +3645,10 @@ async function loadProductModel(config) {
           return objectLoader.loadAsync(config.obj.slice(basePath.length));
         }
         return objectLoader.loadAsync(config.obj);
-      })().catch(() => null);
+      }).catch(() => {
+        design3d.modelCache.delete(cacheKey);
+        return null;
+      });
       design3d.modelCache.set(cacheKey, loadPromise);
     }
     const source = await design3d.modelCache.get(cacheKey);
@@ -3594,9 +3665,12 @@ async function loadProductModel(config) {
   const loadedModels = [];
   for (const modelPath of modelPaths) {
     if (!design3d.modelCache.has(modelPath)) {
-      const loadPromise = design3d.loader.loadAsync(modelPath)
+      const loadPromise = retryModelLoad(() => design3d.loader.loadAsync(modelPath))
       .then((gltf) => gltf.scene)
-      .catch(() => null);
+      .catch(() => {
+        design3d.modelCache.delete(modelPath);
+        return null;
+      });
       design3d.modelCache.set(modelPath, loadPromise);
     }
     const source = await design3d.modelCache.get(modelPath);
@@ -4529,8 +4603,12 @@ function buildFallbackProductModel(group, config) {
 async function buildProductModel(productKey = state.designProduct) {
   if (!THREE || !design3d.scene) return;
   ui.designStage.classList.remove("is-3d-ready");
+  state.designNeedsRender = true;
+  renderFallbackDesign();
   clearProductGroup();
   const config = productConfigs[productKey] || productConfigs.seat;
+  const hasExternalModel = !!(config.obj || config.model || config.models?.length);
+  setDesignStatus(hasExternalModel ? "模型正在载入，可先调整纹样预览" : "");
   const group = new THREE.Group();
   design3d.productGroup = group;
   design3d.scene.add(group);
@@ -4554,6 +4632,9 @@ async function buildProductModel(productKey = state.designProduct) {
   } else {
     buildFallbackProductModel(group, config);
   }
+  if (productKey === state.designProduct) {
+    setDesignStatus(!model && hasExternalModel ? "已显示预览模型，重新选择产品可重试加载" : "");
+  }
   group.scale.setScalar(state.designScale);
   state.designNeedsRender = true;
   renderDesign();
@@ -4569,6 +4650,7 @@ async function ensureDesign3d() {
     ({ clone: cloneSkeletonModel } = await import("./vendor/three/SkeletonUtils.js"));
   } catch (error) {
     console.warn("3D engine unavailable, using canvas preview.", error);
+    setDesignStatus("已显示纹样预览，3D 暂未载入");
     renderFallbackDesign();
     return;
   }
@@ -4577,6 +4659,7 @@ async function ensureDesign3d() {
     design3d.renderer = new THREE.WebGLRenderer({ canvas: ui.designCanvas, antialias: true, alpha: true, preserveDrawingBuffer: true });
   } catch (error) {
     console.warn("WebGL unavailable, using canvas preview.", error);
+    setDesignStatus("已显示纹样预览，当前浏览器未开启 3D");
     renderFallbackDesign();
     return;
   }
@@ -4733,6 +4816,7 @@ async function openProductDesign(source = currentSample() || state.effectSource 
   renderTranslationPathCard();
   renderFallbackDesign();
   renderDesign();
+  if (!design3d.ready) setDesignStatus("模型正在载入，可先调整纹样预览");
   await ensureDesign3d();
   await buildProductModel(state.designProduct);
 }
@@ -5037,6 +5121,7 @@ function activeFrameCanvas() {
 }
 
 function animate() {
+  requestAnimationFrame(animate);
   const dx = Math.abs(state.targetX - state.x);
   const dy = Math.abs(state.targetY - state.y);
   const ds = Math.abs(state.targetScale - state.scale);
@@ -5051,7 +5136,7 @@ function animate() {
   if (state.activeView === "design") {
     if (!state.effectPaused) state.effectTime += 0.016;
     if (USE_TOUCHDESIGNER_BRIDGE) {
-      if (!ui.experienceLiveImage?.complete || mediaWidth(ui.experienceLiveImage) <= 1) drawExperienceLivePlaceholder();
+      if (!isDrawableMedia(ui.experienceLiveImage) || mediaWidth(ui.experienceLiveImage) <= 1) drawExperienceLivePlaceholder();
     } else {
       drawToeProgramFrameToCanvas();
     }
@@ -5064,7 +5149,6 @@ function animate() {
     });
   }
   if (state.activeView === "product-design") renderDesign();
-  requestAnimationFrame(animate);
 }
 
 function hitTest(screenX, screenY) {
@@ -5284,7 +5368,7 @@ function createOriginalCollectionCard(sample) {
   imageButton.setAttribute("aria-label", `观览${sampleDisplayTitle(sample)}`);
   imageButton.addEventListener("click", () => openDetail(sample));
   const sampleImage = document.createElement("img");
-  sampleImage.src = sample.image?.src || sample.tile.src;
+  sampleImage.src = sampleImageUrl(sample);
   sampleImage.alt = sampleDisplayTitle(sample);
   imageButton.appendChild(sampleImage);
 
@@ -5517,10 +5601,12 @@ function safeFileName(text) {
 
 function imageReady(image) {
   if (!image) return Promise.reject(new Error("missing image"));
-  if (image.complete && mediaWidth(image) > 1) return Promise.resolve(image);
+  if (isDrawableMedia(image)) return Promise.resolve(image);
+  if (image._assetAttempts >= 3) return Promise.reject(new Error("image unavailable"));
   return new Promise((resolve, reject) => {
     image.addEventListener("load", () => resolve(image), { once: true });
     image.addEventListener("error", reject, { once: true });
+    ensureAssetImage(image);
   });
 }
 
@@ -5544,7 +5630,7 @@ async function downloadCurrentOriginal() {
     link.remove();
   } catch {
     const link = document.createElement("a");
-    link.href = sample.image.src;
+    link.href = sampleImageUrl(sample);
     link.download = `${safeFileName(sample.asset?.title || sample.file)}.png`;
     document.body.appendChild(link);
     link.click();
@@ -5565,6 +5651,7 @@ function adjacentSample(step) {
 }
 
 function openDetail(sample) {
+  ensureAssetImage(sample.image);
   const switchingSample = state.selectedId !== sample.id;
   state.selectedId = sample.id;
   state.effectSource = sample;
@@ -5581,7 +5668,7 @@ function openDetail(sample) {
   ui.detailYear.textContent = `编号 ${String(sample.book).padStart(3, "0")}`;
   ui.detailPage.textContent = String(sample.page);
   ui.detailCategory.textContent = sample.category.label;
-  ui.detailImage.src = sample.image.src;
+  ui.detailImage.src = sampleImageUrl(sample);
   ui.detailImage.alt = sample.asset?.title || sample.category.label;
   clearDetailCapturedFrame();
   stopTdStreamImage(ui.detailLiveImage);
@@ -5773,7 +5860,7 @@ function prepareOriginalDrag(event) {
   if (!sample) return;
   event.dataTransfer.setData("application/x-fu-pattern-kind", "original");
   event.dataTransfer.setData("application/x-fu-sample-id", String(sample.id));
-  event.dataTransfer.setData("text/plain", sample.image?.src || sample.tile?.src || "");
+  event.dataTransfer.setData("text/plain", sampleImageUrl(sample));
   event.dataTransfer.effectAllowed = "copy";
 }
 
