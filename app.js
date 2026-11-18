@@ -192,7 +192,87 @@ const brocadeAssets = [
 ];
 
 const brocadeImageBase = "assets/brocade-kaleidoscope-full";
+const brocadeScreenBase = "assets/brocade-kaleidoscope-screen";
 const brocadeTileBase = "assets/brocade-kaleidoscope-tiles";
+
+const ASSET_LOAD_CONCURRENCY = 3;
+const ASSET_LOAD_TIMEOUT = 22000;
+const assetLoadQueue = [];
+const activeAssetImages = new Set();
+let visibleMapAssetImages = new Set();
+let activeAssetLoads = 0;
+
+function sortAssetLoadQueue() {
+  assetLoadQueue.sort((a, b) => {
+    const priority = (a._assetPriority ?? 5) - (b._assetPriority ?? 5);
+    return priority || (a._assetRank || 0) - (b._assetRank || 0) || (a._assetQueuedAt || 0) - (b._assetQueuedAt || 0);
+  });
+}
+
+function pumpAssetLoadQueue() {
+  while (activeAssetLoads < ASSET_LOAD_CONCURRENCY && assetLoadQueue.length) {
+    sortAssetLoadQueue();
+    for (let index = assetLoadQueue.length - 1; index >= 0; index -= 1) {
+      const queued = assetLoadQueue[index];
+      if (queued._assetMapOnly && (state.activeView !== "discover" || state.mode !== "content" || !visibleMapAssetImages.has(queued))) {
+        queued._assetQueued = false;
+        assetLoadQueue.splice(index, 1);
+      }
+    }
+    const backgroundLoads = Array.from(activeAssetImages).filter((entry) => entry._assetMapOnly || entry._assetPriority >= 3).length;
+    const nextIndex = assetLoadQueue.findIndex((entry) => !((entry._assetMapOnly || entry._assetPriority >= 3) && backgroundLoads >= ASSET_LOAD_CONCURRENCY - 1));
+    if (nextIndex < 0) break;
+    const [image] = assetLoadQueue.splice(nextIndex, 1);
+    image._assetQueued = false;
+    if (image._assetStarted || image._assetUrl?.startsWith("data:")) continue;
+
+    activeAssetLoads += 1;
+    activeAssetImages.add(image);
+    image._assetActive = true;
+    let timeout = 0;
+    const release = () => {
+      if (!image._assetActive) return;
+      window.clearTimeout(timeout);
+      image.removeEventListener("load", release);
+      image.removeEventListener("error", release);
+      image._assetActive = false;
+      activeAssetImages.delete(image);
+      activeAssetLoads = Math.max(0, activeAssetLoads - 1);
+      pumpAssetLoadQueue();
+    };
+    image.addEventListener("load", release, { once: true });
+    image.addEventListener("error", release, { once: true });
+    image._assetStarted = true;
+    image._assetAttempts += 1;
+    const separator = image._assetUrl.includes("?") ? "&" : "?";
+    const retry = image._assetAttempts > 1 ? `${separator}asset_retry=${image._assetAttempts}` : "";
+    image.src = `${image._assetUrl}${retry}`;
+    timeout = window.setTimeout(() => {
+      if (!image._assetActive) return;
+      release();
+      image._assetTimedOut = true;
+      image.removeAttribute("src");
+      image.dispatchEvent(new Event("error"));
+    }, ASSET_LOAD_TIMEOUT);
+  }
+}
+
+function queueAssetImage(image, priority = 5, mapOnly = false, rank = 0) {
+  if (!image?._assetUrl || isDrawableMedia(image)) return image;
+  image._assetMapOnly = image._assetStarted || image._assetQueued ? image._assetMapOnly && mapOnly : mapOnly;
+  image._assetPriority = Math.min(image._assetPriority ?? priority, priority);
+  image._assetRank = rank;
+  if (image._assetStarted || image._assetQueued) {
+    sortAssetLoadQueue();
+    pumpAssetLoadQueue();
+    return image;
+  }
+  image._assetQueued = true;
+  image._assetQueuedAt = performance.now();
+  assetLoadQueue.push(image);
+  pumpAssetLoadQueue();
+  return image;
+}
 
 const excludedBrocadeFiles = new Set([
   "material-02.jpg",
@@ -275,27 +355,41 @@ function isDrawableMedia(media) {
   return media.width > 0 && media.height > 0;
 }
 
-function ensureAssetImage(image) {
-  if (!image?._assetUrl || image._assetStarted) return image;
-  image._assetStarted = true;
-  image._assetAttempts += 1;
-  const separator = image._assetUrl.includes("?") ? "&" : "?";
-  const retry = image._assetAttempts > 1 ? `${separator}asset_retry=${image._assetAttempts}` : "";
-  image.src = `${image._assetUrl}${retry}`;
-  return image;
+function ensureAssetImage(image, priority = 2) {
+  if (!image?._assetUrl || isDrawableMedia(image)) return image;
+  if (image._assetUrl.startsWith("data:")) {
+    if (!image._assetStarted) {
+      image._assetStarted = true;
+      image._assetAttempts += 1;
+      image.src = image._assetUrl;
+    }
+    return image;
+  }
+  return queueAssetImage(image, priority);
 }
 
 function sampleImageUrl(sample) {
-  const url = sample?.image?._assetUrl || sample?.image?.src || sample?.tile?.src || "";
+  const url = sample?.image?._assetUrl
+    || sample?.image?.src
+    || sample?.tile?._assetUrl
+    || sample?.tile?.src
+    || "";
   return url ? new URL(url, document.baseURI).href : "";
 }
 
-function createAssetImage(url, deferred = false) {
+function sampleOriginalUrl(sample) {
+  const url = sample?.originalUrl || sample?.originalImage?._assetUrl || sample?.image?._assetUrl || sample?.image?.src || "";
+  return url ? new URL(url, document.baseURI).href : "";
+}
+
+function createAssetImage(url, deferred = false, priority = 5) {
   const image = new Image();
   image.decoding = "async";
   image._assetUrl = url;
   image._assetAttempts = 0;
+  image._assetPriority = priority;
   image.onload = () => {
+    image._assetTimedOut = false;
     imageLoads += 1;
     state.needsRender = true;
     state.designNeedsRender = true;
@@ -309,24 +403,27 @@ function createAssetImage(url, deferred = false) {
     }
   };
   image.onerror = () => {
+    if (image._assetRetryTimer) return;
     if (image._assetAttempts >= 3 || image._assetUrl.startsWith("data:")) return;
-    window.setTimeout(() => {
+    image._assetRetryTimer = window.setTimeout(() => {
+      image._assetRetryTimer = 0;
       image._assetStarted = false;
-      ensureAssetImage(image);
+      queueAssetImage(image, image._assetPriority ?? 2, image._assetMapOnly, image._assetRank);
     }, image._assetAttempts * 900);
   };
-  if (!deferred) ensureAssetImage(image);
+  if (!deferred) ensureAssetImage(image, priority);
   return image;
 }
 
 function mediaForAsset(asset) {
   const imageBase = asset.imageBase || brocadeImageBase;
+  const screenBase = asset.screenBase || brocadeScreenBase;
   const tileBase = asset.tileBase || brocadeTileBase;
-  const mediaKey = `${imageBase}/${asset.file}`;
+  const mediaKey = `${imageBase}/${screenBase}/${asset.file}`;
   if (assetMedia.has(mediaKey)) return assetMedia.get(mediaKey);
-  const image = createAssetImage(`${imageBase}/${asset.file}`, true);
-  const tile = createAssetImage(`${tileBase}/${asset.file}`);
-  const media = { image, tile };
+  const image = createAssetImage(`${screenBase}/${asset.file}`, true, 1);
+  const tile = createAssetImage(`${tileBase}/${asset.file}`, true, 4);
+  const media = { image, tile, originalUrl: `${imageBase}/${asset.file}` };
   assetMedia.set(mediaKey, media);
   return media;
 }
@@ -551,6 +648,7 @@ let GLTFLoader = null;
 let OBJLoader = null;
 let MTLLoader = null;
 let cloneSkeletonModel = null;
+let MeshoptDecoder = null;
 const design3d = {
   renderer: null,
   scene: null,
@@ -570,7 +668,9 @@ const design3d = {
   panX: 0,
   panY: 0,
   distance: 6.8,
-  ready: false
+  ready: false,
+  initializing: null,
+  modelRequestId: 0
 };
 
 function setDesignStatus(message = "") {
@@ -763,7 +863,7 @@ function buildSamples() {
   for (let i = 0; i < total; i += 1) {
     const asset = curatedBrocadeAssets[i % curatedBrocadeAssets.length];
     const category = categoryById[asset.category] || categories[i % categories.length];
-    const { image, tile } = mediaForAsset(asset);
+    const { image, tile, originalUrl } = mediaForAsset(asset);
     const file = asset.file;
     const hue = (i * 137.508 + (i % 17) * 6) % 360;
     const angle = (hue - 35) * Math.PI / 180;
@@ -782,6 +882,7 @@ function buildSamples() {
       file,
       image,
       tile,
+      originalUrl,
       colorTile: makeColorTile(hue, hashString(`${file}-color-${i}`)),
       asset,
       category,
@@ -894,6 +995,33 @@ function drawBackground() {
   ctx.fillRect(0, 0, state.width, state.height);
 }
 
+function updateMapAssetQueue(visibleSamples) {
+  const candidates = new Map();
+  if (state.activeView === "discover" && state.mode === "content") {
+    visibleSamples.forEach((sample) => {
+      const pos = positionFor(sample);
+      const screen = worldToScreen(pos.x, pos.y);
+      if (screen.x < -30 || screen.x > state.width + 30 || screen.y < -30 || screen.y > state.height + 30) return;
+      const rank = Math.hypot(screen.x - state.width / 2, screen.y - state.height / 2);
+      if (!candidates.has(sample.tile) || rank < candidates.get(sample.tile)) candidates.set(sample.tile, rank);
+    });
+  }
+  visibleMapAssetImages = new Set(candidates.keys());
+  for (let index = assetLoadQueue.length - 1; index >= 0; index -= 1) {
+    const queued = assetLoadQueue[index];
+    if (queued._assetMapOnly && !visibleMapAssetImages.has(queued)) {
+      queued._assetQueued = false;
+      assetLoadQueue.splice(index, 1);
+    }
+  }
+  Array.from(candidates.entries())
+    .filter(([image]) => !isDrawableMedia(image) && !image?._assetStarted)
+    .sort((a, b) => a[1] - b[1])
+    .slice(0, 12)
+    .forEach(([image, rank]) => queueAssetImage(image, 4, true, rank));
+  pumpAssetLoadQueue();
+}
+
 function drawSample(sample) {
   const pos = positionFor(sample);
   const screen = worldToScreen(pos.x, pos.y);
@@ -901,7 +1029,7 @@ function drawSample(sample) {
   if (screen.x < -30 || screen.x > state.width + 30 || screen.y < -30 || screen.y > state.height + 30) return;
   const selected = state.selectedId === sample.id;
   const hover = state.hoverId === sample.id;
-  const source = state.mode === "color" || state.scale < 1.08 || !isDrawableMedia(sample.tile)
+  const source = state.mode === "color" || !isDrawableMedia(sample.tile)
     ? sample.colorTile : sample.tile;
   ctx.save();
   ctx.globalAlpha = selected || hover ? 1 : 0.84;
@@ -921,14 +1049,17 @@ function drawSample(sample) {
 
 function render() {
   if (!state.needsRender) return;
+  const visibleSamples = filteredSamples();
+  updateMapAssetQueue(visibleSamples);
   drawBackground();
-  filteredSamples().forEach(drawSample);
+  visibleSamples.forEach(drawSample);
   state.needsRender = false;
 }
 
-function sourceImageFor(sample, preferFull = false) {
+function sourceImageFor(sample, preferFull = false, priority = 1) {
   if (!sample) return null;
-  if (preferFull) ensureAssetImage(sample.image);
+  ensureAssetImage(sample.tile, preferFull ? 0 : priority);
+  if (preferFull) ensureAssetImage(sample.image, 1);
   if (preferFull && isDrawableMedia(sample.image)) return sample.image;
   if (isDrawableMedia(sample.tile)) return sample.tile;
   return isDrawableMedia(sample.image) ? sample.image : null;
@@ -1098,17 +1229,17 @@ function cssUrl(value) {
 }
 
 const productConfigs = {
-  pillow: { label: "靠垫", kind: "pillowShowcase", model: "assets/models/throw_pillows_01/throw_pillows_01_1k.gltf", targetSize: 2.55, rotation: [0, -0.24, 0], position: [0, 0.1, 0], fallbackProduct: "pillow" },
+  pillow: { label: "靠垫", kind: "pillowShowcase", model: "assets/models/optimized-20261119/throw_pillows_01.glb", targetSize: 2.55, rotation: [0, -0.24, 0], position: [0, 0.1, 0], fallbackProduct: "pillow" },
   scarf: {
     label: "围巾",
     kind: "scarfShowcase",
     fallbackProduct: "scarf"
   },
-  socks: { label: "运动袜", kind: "socks", obj: "assets/models/rigmodels-socks/4MXDB4XFSN6Y16MMDQKFBRRQ2.obj", mtl: "assets/models/rigmodels-socks/4MXDB4XFSN6Y16MMDQKFBRRQ2.mtl", targetSize: 2.72, rotation: [-0.03, -0.2, 0], position: [0, 0.22, 0], generatePaintUvs: true, forcePaintUvs: true, fallbackProduct: "socks" },
+  socks: { label: "运动袜", kind: "socks", model: "assets/models/optimized-20261119/socks.glb", targetSize: 2.72, rotation: [-0.03, -0.2, 0], position: [0, 0.22, 0], generatePaintUvs: true, forcePaintUvs: true, fallbackProduct: "socks" },
   dress: {
     label: "连衣裙",
     kind: "dress",
-    obj: "assets/models/makehuman-f-dress-11/f_dress_11.obj",
+    model: "assets/models/optimized-20261119/f_dress_11.glb",
     targetSize: 2.12,
     rotation: [0, -0.14, 0],
     position: [0, 0.26, 0],
@@ -1119,8 +1250,7 @@ const productConfigs = {
   cup: {
     label: "杯子",
     kind: "mug",
-    obj: "assets/models/user_mug_14/mug_14_split.obj",
-    mtl: "assets/models/user_mug_14/mug_14_split.mtl",
+    model: "assets/models/optimized-20261119/mug_14_split.glb",
     targetSize: 2.9,
     rotation: [0, 0.02, 0],
     position: [0, 0.22, 0],
@@ -1132,16 +1262,16 @@ const productConfigs = {
     textureRepeatScale: 0.72,
     fallbackProduct: "mug"
   },
-  cushion: { label: "靠枕", kind: "pillow", model: "assets/models/throw_pillows_01/throw_pillows_01_1k.gltf", targetSize: 2.28, rotation: [0, 0.06, 0], position: [0, 0.38, 0], hideNames: ["pillow01"], fallbackProduct: "cushion" },
-  seat: { label: "坐垫套装", kind: "seat", model: "assets/models/silk-pouf.glb", targetSize: 2.7, rotation: [0, 0.35, 0], position: [0, 0.86, 0], fallbackProduct: "seat" },
-  bedding: { label: "床品", kind: "bed", model: "assets/models/vintage_day_bed/vintage_day_bed_1k.gltf", targetSize: 3.1, rotation: [0, 0.46, 0], position: [0, 0.08, 0], keepOriginalMaterial: true, supplement: "beddingTextile", fallbackProduct: "bedding" },
-  shirt_m: { label: "T恤衫男士", kind: "shirt", model: "assets/models/poly_pizza/t_shirt_nour.glb", targetSize: 2.42, rotation: [0, -0.28, 0], position: [0, 1.02, 0], fallbackProduct: "shirt_m" },
-  shirt_w: { label: "T恤衫女士", kind: "shirt", model: "assets/models/poly_pizza/t_shirt_nour.glb", targetSize: 2.24, rotation: [0, 0.28, 0], position: [0, 1.02, 0], fallbackProduct: "shirt_w" },
+  cushion: { label: "靠枕", kind: "pillow", model: "assets/models/optimized-20261119/throw_pillows_01.glb", targetSize: 2.28, rotation: [0, 0.06, 0], position: [0, 0.38, 0], hideNames: ["pillow01"], fallbackProduct: "cushion" },
+  seat: { label: "坐垫套装", kind: "seat", model: "assets/models/optimized-20261119/silk-pouf.glb", targetSize: 2.7, rotation: [0, 0.35, 0], position: [0, 0.86, 0], fallbackProduct: "seat" },
+  bedding: { label: "床品", kind: "bed", model: "assets/models/optimized-20261119/vintage_day_bed.glb", targetSize: 3.1, rotation: [0, 0.46, 0], position: [0, 0.08, 0], keepOriginalMaterial: true, supplement: "beddingTextile", fallbackProduct: "bedding" },
+  shirt_m: { label: "T恤衫男士", kind: "shirt", model: "assets/models/optimized-20261119/t_shirt_nour.glb", targetSize: 2.42, rotation: [0, -0.28, 0], position: [0, 1.02, 0], fallbackProduct: "shirt_m" },
+  shirt_w: { label: "T恤衫女士", kind: "shirt", model: "assets/models/optimized-20261119/t_shirt_nour.glb", targetSize: 2.24, rotation: [0, 0.28, 0], position: [0, 1.02, 0], fallbackProduct: "shirt_w" },
   blanket: { label: "毯子", kind: "blanketShowcase", fallbackProduct: "blanket" },
   silk_scarf: {
     label: "丝巾",
     kind: "openScarfModel",
-    model: "assets/models/sheen_cloth/SheenCloth.gltf",
+    model: "assets/models/optimized-20261119/SheenCloth.glb",
     targetSize: 2.28,
     rotation: [-0.82, 0.42, -0.22],
     position: [0, 0.32, 0],
@@ -1157,8 +1287,7 @@ const productConfigs = {
   mug: {
     label: "咖啡杯",
     kind: "mug",
-    obj: "assets/models/user_mug_14/mug_14_split.obj",
-    mtl: "assets/models/user_mug_14/mug_14_split.mtl",
+    model: "assets/models/optimized-20261119/mug_14_split.glb",
     targetSize: 2.9,
     rotation: [0, 0.02, 0],
     position: [0, 0.22, 0],
@@ -2611,9 +2740,53 @@ function drawTdMirrorEffect(targetCtx, targetWidth, targetHeight, img, options =
   targetCtx.restore();
 }
 
-function renderTdMirrorCanvas(canvas) {
-  const img = canvas._tdImage;
-  if (!isDrawableMedia(img)) return;
+const samplePreviewImageBindings = new Map();
+let samplePreviewImageObserver = null;
+
+function bindSamplePreviewImage(image, sample, options = {}) {
+  samplePreviewImageBindings.get(image)?.();
+  const media = uniqueList([sample?.tile, sample?.image]);
+  const update = () => {
+    const source = options.preferScreen
+      ? sourceImageFor(sample, true)
+      : (isDrawableMedia(sample?.image) ? sample.image : sourceImageFor(sample, false, options.priority ?? 3));
+    const url = source?.currentSrc || source?.src || "";
+    if (url && image.src !== url) image.src = url;
+    image.setAttribute("aria-busy", url ? "false" : "true");
+  };
+  const unbind = () => media.forEach((source) => source.removeEventListener("load", update));
+  media.forEach((source) => source.addEventListener("load", update));
+  samplePreviewImageBindings.set(image, unbind);
+  if (!samplePreviewImageObserver) {
+    samplePreviewImageObserver = new MutationObserver(() => {
+      samplePreviewImageBindings.forEach((dispose, target) => {
+        if (!target.isConnected) {
+          dispose();
+          samplePreviewImageBindings.delete(target);
+        }
+      });
+    });
+    samplePreviewImageObserver.observe(document.body, { childList: true, subtree: true });
+  }
+  ensureAssetImage(sample?.tile, options.priority ?? 3);
+  image.decoding = "async";
+  update();
+}
+
+function tdPreviewSource(canvas) {
+  return canvas._tdSample ? sourceImageFor(canvas._tdSample, true) : canvas._tdImage;
+}
+
+function setTdPreviewSource(canvas, source) {
+  if (source && typeof source === "object" && (source.image || source.tile)) {
+    canvas._tdSample = source;
+    sourceImageFor(source, true);
+  } else if (typeof source === "string" && source) {
+    canvas._tdImage = createAssetImage(source);
+  }
+}
+
+function tdPreviewContext(canvas) {
   const rect = canvas.getBoundingClientRect();
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
   const width = Math.max(1, Math.round(rect.width));
@@ -2626,6 +2799,27 @@ function renderTdMirrorCanvas(canvas) {
   }
   const ctx = canvas.getContext("2d");
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  return { ctx, width, height };
+}
+
+function drawTdPreviewLoading(ctx, width, height) {
+  ctx.clearRect(0, 0, width, height);
+  ctx.fillStyle = "#090807";
+  ctx.fillRect(0, 0, width, height);
+  ctx.fillStyle = "rgba(255,255,255,.82)";
+  ctx.font = "500 16px system-ui, sans-serif";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText("纹样正在载入", width / 2, height / 2);
+}
+
+function renderTdMirrorCanvas(canvas) {
+  const img = tdPreviewSource(canvas);
+  const { ctx, width, height } = tdPreviewContext(canvas);
+  if (!isDrawableMedia(img)) {
+    drawTdPreviewLoading(ctx, width, height);
+    return;
+  }
   drawTdMirrorEffect(ctx, width, height, img, { card: canvas._tdCard });
 }
 
@@ -2633,31 +2827,19 @@ function createTdMirrorPreview(src, options = {}) {
   const preview = document.createElement("canvas");
   preview.className = `td-mirror-preview${options.card ? " is-card" : ""}`;
   preview._tdCard = !!options.card;
-  const image = new Image();
-  image.decoding = "async";
-  image.onload = () => renderTdMirrorCanvas(preview);
-  image.src = src;
-  preview._tdImage = image;
+  setTdPreviewSource(preview, src);
   tdPreviewCanvases.add(preview);
   window.setTimeout(() => renderTdMirrorCanvas(preview), 0);
   return preview;
 }
 
 function renderToeProgramPreviewCanvas(canvas) {
-  const img = canvas._tdImage;
-  if (!isDrawableMedia(img) || !mediaWidth(img)) return;
-  const rect = canvas.getBoundingClientRect();
-  const dpr = Math.min(window.devicePixelRatio || 1, 2);
-  const width = Math.max(1, Math.round(rect.width));
-  const height = Math.max(1, Math.round(rect.height));
-  const pixelW = Math.round(width * dpr);
-  const pixelH = Math.round(height * dpr);
-  if (canvas.width !== pixelW || canvas.height !== pixelH) {
-    canvas.width = pixelW;
-    canvas.height = pixelH;
+  const img = tdPreviewSource(canvas);
+  const { ctx, width, height } = tdPreviewContext(canvas);
+  if (!isDrawableMedia(img)) {
+    drawTdPreviewLoading(ctx, width, height);
+    return;
   }
-  const ctx = canvas.getContext("2d");
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   drawWebGeneratedToeFrame(ctx, width, height, {
     source: img,
     time: performance.now() / 1000
@@ -2668,11 +2850,7 @@ function createToeProgramPreview(src) {
   const preview = document.createElement("canvas");
   preview.className = "td-mirror-preview is-toe-program";
   preview._tdRenderMode = "toe-program";
-  const image = new Image();
-  image.decoding = "async";
-  image.onload = () => renderToeProgramPreviewCanvas(preview);
-  image.src = src;
-  preview._tdImage = image;
+  setTdPreviewSource(preview, src);
   tdPreviewCanvases.add(preview);
   window.setTimeout(() => renderToeProgramPreviewCanvas(preview), 0);
   return preview;
@@ -2688,7 +2866,7 @@ function collectionVisualSource() {
     || samples.find((entry) => entry.file === "kaleido-16.jpg")
     || samples.find((entry) => entry.file === "kaleido-26.jpg")
     || samples[0];
-  return sampleImageUrl(sample);
+  return sample;
 }
 
 function clearTdCollectionStage() {
@@ -2703,7 +2881,7 @@ function clearTdCollectionStage() {
 
 function renderTdCollectionStage() {
   if (!ui.tdCollectionStage || !ui.tdStageVisual) return;
-  ui.tdStageVisual.innerHTML = "";
+  clearTdCollectionStage();
   ui.tdCollectionStage.hidden = false;
   if (!USE_TOUCHDESIGNER_BRIDGE) {
     const source = collectionVisualSource();
@@ -2790,7 +2968,8 @@ function renderDesignSourceList() {
     button.type = "button";
     button.setAttribute("aria-label", `使用${entry.label}纹样`);
     const img = document.createElement("img");
-    img.src = entry.src;
+    if (entry.type !== "frame" && entry.sample) bindSamplePreviewImage(img, entry.sample);
+    else img.src = entry.src;
     img.alt = entry.label;
     const label = document.createElement("span");
     label.textContent = entry.label;
@@ -2806,7 +2985,10 @@ function applyDesignSource(entry) {
   state.designPatternUrl = entry.src || "";
   state.designPatternImage = null;
   sendTouchDesignerInput({ key: entry.key, label: entry.label, src: entry.src });
-  if (state.designPatternUrl) {
+  if (entry.type !== "frame" && entry.sample) {
+    sourceImageFor(entry.sample, true);
+    if (isDrawableMedia(entry.sample.image)) state.designPatternImage = entry.sample.image;
+  } else if (state.designPatternUrl) {
     const image = createAssetImage(state.designPatternUrl, true);
     image.addEventListener("load", () => {
       if (state.designSourceKey !== entry.key) return;
@@ -2827,9 +3009,10 @@ function applyDesignSource(entry) {
 }
 
 function designPatternSource() {
-  if (state.designPatternUrl) return state.designPatternUrl;
   const sample = currentDesignSample();
-  return isDrawableMedia(sample?.image) ? sampleImageUrl(sample) : sample?.tile?.src || sampleImageUrl(sample);
+  if (state.designPatternUrl && state.designPatternUrl !== sampleImageUrl(sample)) return state.designPatternUrl;
+  const image = sourceImageFor(sample, true);
+  return image?.currentSrc || image?.src || "";
 }
 
 function updateStaticDesignModel() {
@@ -3369,15 +3552,25 @@ function updateDesignTexture() {
   state.designNeedsRender = true;
 }
 
+function disposeProductObject(group) {
+  if (!group) return;
+  const geometries = new Set();
+  const materials = new Set();
+  group.traverse((object) => {
+    if (object.geometry) geometries.add(object.geometry);
+    const entries = Array.isArray(object.material) ? object.material : [object.material];
+    entries.forEach((material) => {
+      if (material && material !== design3d.material) materials.add(material);
+    });
+  });
+  geometries.forEach((geometry) => geometry.dispose?.());
+  materials.forEach((material) => material.dispose?.());
+  group.clear();
+}
+
 function clearProductGroup() {
   if (!design3d.productGroup) return;
-  design3d.productGroup.traverse((object) => {
-    if (object.geometry) object.geometry.dispose();
-    if (object.material && object.material !== design3d.material) {
-      if (Array.isArray(object.material)) object.material.forEach((material) => material.dispose?.());
-      else object.material.dispose?.();
-    }
-  });
+  disposeProductObject(design3d.productGroup);
   design3d.scene.remove(design3d.productGroup);
   design3d.productGroup = null;
 }
@@ -3385,7 +3578,10 @@ function clearProductGroup() {
 function cloneDesignModel(source) {
   const clone = cloneSkeletonModel ? cloneSkeletonModel(source) : source.clone(true);
   clone.traverse((node) => {
-    if (node.isMesh && node.geometry) node.geometry = node.geometry.clone();
+    if (!node.isMesh) return;
+    if (node.geometry) node.geometry = node.geometry.clone();
+    if (Array.isArray(node.material)) node.material = node.material.map((material) => material.clone());
+    else if (node.material) node.material = node.material.clone();
   });
   return clone;
 }
@@ -3627,6 +3823,20 @@ async function retryModelLoad(load) {
   }
 }
 
+
+function prepareMissingModelNormals(model) {
+  model.traverse((node) => {
+    if (!node.isMesh || !node.geometry || node.geometry.attributes.normal) return;
+    // Match OBJLoader's per-face normals when an original OBJ has no vn data.
+    const geometry = node.geometry;
+    if (geometry.index) {
+      node.geometry = geometry.toNonIndexed();
+      geometry.dispose();
+    }
+    node.geometry.computeVertexNormals();
+  });
+}
+
 async function loadProductModel(config) {
   if (config.obj) {
     if (!OBJLoader) return null;
@@ -3679,6 +3889,7 @@ async function loadProductModel(config) {
   }
   let model = new THREE.Group();
   loadedModels.forEach((loadedModel) => model.add(loadedModel));
+  prepareMissingModelNormals(model);
   if (config.flattenSkinned) flattenSkinnedMeshes(model);
   pruneModelParts(model, config);
   if (config.bakeNormalizeGeometry) model = bakeNormalizedModelGeometry(model);
@@ -4576,83 +4787,131 @@ function addProductSupplement(group, config) {
 }
 
 function buildFallbackProductModel(group, config) {
-  if (config.kind === "softBox") addSoftBox(group, config);
-  else if (config.kind === "cloth") addCloth(group, config);
-  else if (config.kind === "cup") addCup(group, false);
-  else if (config.kind === "mug") addCup(group, true);
-  else if (config.kind === "dress") addDress(group);
-  else if (config.kind === "shirt") addShirt(group, config);
-  else if (config.kind === "socks") addSocks(group);
-  else if (config.kind === "leggings") addLeggings(group);
-  else if (config.kind === "scarfShowcase") addScarfShowcase(group);
-  else if (config.kind === "silkScarfShowcase") addSilkScarfShowcase(group);
-  else if (config.kind === "pillowShowcase") addPillowShowcase(group);
-  else if (config.kind === "socksShowcase") addSocksShowcase(group);
-  else if (config.kind === "dressShowcase") addDressShowcase(group);
-  else if (config.kind === "wrapDressShowcase") addWrapDressShowcase(group);
-  else if (config.kind === "tshirtShowcase") addTshirtShowcase(group, config);
-  else if (config.kind === "leggingsShowcase") addLeggingsShowcase(group);
-  else if (config.kind === "blanketShowcase") addBlanketShowcase(group);
-  else if (config.kind === "beddingShowcase") addBeddingShowcase(group);
-  else if (config.kind === "mugShowcase") addMugShowcase(group);
-  else if (config.kind === "seat") addSeat(group);
-  else if (config.kind === "bedding") addBedding(group);
-  else if (config.kind === "notebook") addNotebook(group);
+  const kind = config.kind === "bed" ? "bedding"
+    : config.kind === "openScarfModel" ? "silkScarfShowcase"
+    : config.kind === "pillow" ? "pillowShowcase"
+    : config.kind;
+  if (kind === "softBox") addSoftBox(group, config);
+  else if (kind === "cloth") addCloth(group, config);
+  else if (kind === "cup") addCup(group, false);
+  else if (kind === "mug") addCup(group, true);
+  else if (kind === "dress") addDress(group);
+  else if (kind === "shirt") addShirt(group, config);
+  else if (kind === "socks") addSocks(group);
+  else if (kind === "leggings") addLeggings(group);
+  else if (kind === "scarfShowcase") addScarfShowcase(group);
+  else if (kind === "silkScarfShowcase") addSilkScarfShowcase(group);
+  else if (kind === "pillowShowcase") addPillowShowcase(group);
+  else if (kind === "socksShowcase") addSocksShowcase(group);
+  else if (kind === "dressShowcase") addDressShowcase(group);
+  else if (kind === "wrapDressShowcase") addWrapDressShowcase(group);
+  else if (kind === "tshirtShowcase") addTshirtShowcase(group, config);
+  else if (kind === "leggingsShowcase") addLeggingsShowcase(group);
+  else if (kind === "blanketShowcase") addBlanketShowcase(group);
+  else if (kind === "beddingShowcase") addBeddingShowcase(group);
+  else if (kind === "mugShowcase") addMugShowcase(group);
+  else if (kind === "seat") addSeat(group);
+  else if (kind === "bedding") addBedding(group);
+  else if (kind === "notebook") addNotebook(group);
 }
 
 async function buildProductModel(productKey = state.designProduct) {
-  if (!THREE || !design3d.scene) return;
+  if (!THREE || !design3d.scene || productKey !== state.designProduct) return;
+  const requestId = ++design3d.modelRequestId;
   ui.designStage.classList.remove("is-3d-ready");
   state.designNeedsRender = true;
   renderFallbackDesign();
   clearProductGroup();
   const config = productConfigs[productKey] || productConfigs.seat;
   const hasExternalModel = !!(config.obj || config.model || config.models?.length);
-  setDesignStatus(hasExternalModel ? "模型正在载入，可先调整纹样预览" : "");
   const group = new THREE.Group();
   design3d.productGroup = group;
   design3d.scene.add(group);
+  const isCurrentRequest = () => design3d.modelRequestId === requestId
+    && design3d.productGroup === group && productKey === state.designProduct;
   if (config.kind === "photoMockup") {
+    setDesignStatus("");
     state.designNeedsRender = true;
     renderDesign();
     return;
   }
   if (config.supplementOnly) {
     addProductSupplement(group, config);
+    setDesignStatus("");
     state.designNeedsRender = true;
     renderDesign();
     return;
   }
-  const model = await loadProductModel(config);
+  buildFallbackProductModel(group, config);
+  group.scale.setScalar(state.designScale);
+  setDesignStatus(hasExternalModel ? "精细模型正在载入，可先旋转与调整纹样" : "");
+  state.designNeedsRender = true;
+  renderDesign();
+  if (!hasExternalModel) return;
+  const waitNotice = window.setTimeout(() => {
+    if (isCurrentRequest()) setDesignStatus("精细模型仍在载入，当前预览可继续操作");
+  }, 10000);
+  let model;
+  try {
+    model = await loadProductModel(config);
+  } catch (error) {
+    console.warn("Detailed model unavailable, keeping the preview model.", error);
+  } finally {
+    window.clearTimeout(waitNotice);
+  }
+  if (!isCurrentRequest()) {
+    disposeProductObject(model);
+    return;
+  }
   if (model) {
+    disposeProductObject(group);
     group.add(model);
     if (config.supplement === "dressSkirt") addDressSkirtSupplement(group);
     else if (config.supplement === "dressOverlay") addDressOverlaySupplement(group);
     else addProductSupplement(group, config);
-  } else {
-    buildFallbackProductModel(group, config);
   }
-  if (productKey === state.designProduct) {
-    setDesignStatus(!model && hasExternalModel ? "已显示预览模型，重新选择产品可重试加载" : "");
-  }
+  setDesignStatus(!model ? "已显示预览模型，重新选择产品可重试加载" : "");
   group.scale.setScalar(state.designScale);
   state.designNeedsRender = true;
   renderDesign();
 }
 
-async function ensureDesign3d() {
-  if (design3d.ready) return;
+function ensureDesign3d() {
+  if (design3d.ready) return Promise.resolve(true);
+  if (design3d.initializing) return design3d.initializing;
+  design3d.initializing = initializeDesign3d().catch((error) => {
+    console.warn("3D initialization failed, keeping the canvas preview.", error);
+    design3d.ready = false;
+    design3d.renderer?.dispose();
+    design3d.renderer = null;
+    design3d.scene = null;
+    design3d.material = null;
+    setDesignStatus("已显示纹样预览，3D 暂未载入");
+    renderFallbackDesign();
+    return false;
+  }).finally(() => {
+    design3d.initializing = null;
+  });
+  return design3d.initializing;
+}
+
+async function initializeDesign3d() {
   try {
-    THREE = await import("three");
-    ({ GLTFLoader } = await import("./vendor/three/GLTFLoader.js"));
-    ({ OBJLoader } = await import("./vendor/three/OBJLoader.js"));
-    ({ MTLLoader } = await import("./vendor/three/MTLLoader.js"));
-    ({ clone: cloneSkeletonModel } = await import("./vendor/three/SkeletonUtils.js"));
+    let engine;
+    try {
+      engine = await import("./vendor/three/design-engine.js?v=20261119-fast-3");
+    } catch {
+      engine = await import(`./vendor/three/design-engine.js?v=20261119-fast-3&engine_retry=${Date.now()}`);
+    }
+    if (!engine.THREE?.WebGLRenderer || !engine.GLTFLoader || !engine.OBJLoader || !engine.MTLLoader || !engine.MeshoptDecoder) {
+      throw new Error("The 3D engine did not load completely.");
+    }
+    ({ THREE, GLTFLoader, OBJLoader, MTLLoader, cloneSkeletonModel, MeshoptDecoder } = engine);
   } catch (error) {
     console.warn("3D engine unavailable, using canvas preview.", error);
     setDesignStatus("已显示纹样预览，3D 暂未载入");
     renderFallbackDesign();
-    return;
+    return false;
   }
   const rect = ui.designStage.getBoundingClientRect();
   try {
@@ -4661,7 +4920,7 @@ async function ensureDesign3d() {
     console.warn("WebGL unavailable, using canvas preview.", error);
     setDesignStatus("已显示纹样预览，当前浏览器未开启 3D");
     renderFallbackDesign();
-    return;
+    return false;
   }
   design3d.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   design3d.renderer.setSize(Math.max(1, rect.width), Math.max(1, rect.height), false);
@@ -4691,9 +4950,11 @@ async function ensureDesign3d() {
     side: THREE.DoubleSide
   });
   design3d.loader = new GLTFLoader();
+  design3d.loader.setMeshoptDecoder(MeshoptDecoder);
   design3d.ready = true;
   bindDesignCanvasEvents();
   updateDesignTexture();
+  return true;
 }
 
 function resizeDesignRenderer() {
@@ -5296,7 +5557,7 @@ function renderOriginalSlot(slot, sample, index, mode = "map") {
     slot.onclick = null;
     if (sample) {
       const img = document.createElement("img");
-      img.src = sample.tile.src;
+      bindSamplePreviewImage(img, sample);
       img.alt = sampleDisplayTitle(sample);
       slot.classList.add("has-image");
       slot.disabled = false;
@@ -5368,7 +5629,7 @@ function createOriginalCollectionCard(sample) {
   imageButton.setAttribute("aria-label", `观览${sampleDisplayTitle(sample)}`);
   imageButton.addEventListener("click", () => openDetail(sample));
   const sampleImage = document.createElement("img");
-  sampleImage.src = sampleImageUrl(sample);
+  bindSamplePreviewImage(sampleImage, sample);
   sampleImage.alt = sampleDisplayTitle(sample);
   imageButton.appendChild(sampleImage);
 
@@ -5610,11 +5871,20 @@ function imageReady(image) {
   });
 }
 
+function ensureOriginalImage(sample) {
+  if (!sample?.originalUrl) return null;
+  if (!sample.originalImage) {
+    sample.originalImage = createAssetImage(sample.originalUrl, true, 0);
+  }
+  ensureAssetImage(sample.originalImage, 0);
+  return sample.originalImage;
+}
+
 async function downloadCurrentOriginal() {
   const sample = currentSample();
   if (!sample) return;
   try {
-    const image = await imageReady(sample.image);
+    const image = await imageReady(ensureOriginalImage(sample));
     const width = Math.max(1, mediaWidth(image));
     const height = Math.max(1, mediaHeight(image));
     const exportCanvas = document.createElement("canvas");
@@ -5630,7 +5900,7 @@ async function downloadCurrentOriginal() {
     link.remove();
   } catch {
     const link = document.createElement("a");
-    link.href = sampleImageUrl(sample);
+    link.href = sampleOriginalUrl(sample);
     link.download = `${safeFileName(sample.asset?.title || sample.file)}.png`;
     document.body.appendChild(link);
     link.click();
@@ -5651,7 +5921,7 @@ function adjacentSample(step) {
 }
 
 function openDetail(sample) {
-  ensureAssetImage(sample.image);
+  sourceImageFor(sample, true);
   const switchingSample = state.selectedId !== sample.id;
   state.selectedId = sample.id;
   state.effectSource = sample;
@@ -5668,7 +5938,7 @@ function openDetail(sample) {
   ui.detailYear.textContent = `编号 ${String(sample.book).padStart(3, "0")}`;
   ui.detailPage.textContent = String(sample.page);
   ui.detailCategory.textContent = sample.category.label;
-  ui.detailImage.src = sampleImageUrl(sample);
+  bindSamplePreviewImage(ui.detailImage, sample, { preferScreen: true, priority: 0 });
   ui.detailImage.alt = sample.asset?.title || sample.category.label;
   clearDetailCapturedFrame();
   stopTdStreamImage(ui.detailLiveImage);
@@ -5823,7 +6093,7 @@ function buildArchive(activeSample) {
     button.className = `archive-tile${sample.id === activeSample.id ? " is-active" : ""}`;
     button.type = "button";
     const img = document.createElement("img");
-    img.src = sample.tile.src;
+    bindSamplePreviewImage(img, sample);
     img.alt = sample.category.label;
     button.appendChild(img);
     button.addEventListener("click", () => openDetail(sample));
@@ -5948,7 +6218,7 @@ function beginOriginalFavoriteDrag(event) {
   ui.detailFrameSource.setPointerCapture(event.pointerId);
   const ghost = document.createElement("span");
   ghost.className = "original-drag-ghost";
-  ghost.style.setProperty("--source-thumb", `url(${sample.tile.src || sample.image.src})`);
+  ghost.style.setProperty("--source-thumb", `url(${sampleImageUrl(sample)})`);
   document.body.appendChild(ghost);
   state.originalDragging = true;
   state.originalDragGhost = ghost;
